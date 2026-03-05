@@ -1,0 +1,175 @@
+{
+  "nav": {
+    "features": "Features",
+    "pricing": "Pricing",
+    "login": "Login",
+    "getStarted": "Get Started",
+    "dashboard": "Dashboard",
+    "logout": "Logout"
+  },
+  "landing": {
+    "hero": {
+      "title": "Launch Your Product with AI-Powered Precision",
+      "subtitle": "Transform your product launch from chaos to strategy. Atelia combines AI agents, visual content creation, and automated workflows to help you plan, create, and execute successful product launches.",
+      "cta": "Start Your Free Trial",
+      "demo": "Watch Demo"
+    },
+    "features": {
+      "title": "Everything You Need to Launch Successfully",
+      "subtitle": "Powerful tools designed for modern product launchers",
+      "aiAgents": {
+        "title": "AI Content Agents",
+        "description": "Generate launch content, positioning strategies, and marketing copy with specialized AI agents"
+      },
+      "visualStudio": {
+        "title": "Visual Studio",
+        "description": "Create stunning product visuals, mockups, and marketing assets without design skills"
+      },
+      "automation": {
+        "title": "Automation Engine",
+        "description": "Build and deploy multi-channel marketing automation flows"
+      },
+      "calendar": {
+        "title": "Launch Calendar",
+        "description": "Plan and orchestrate your entire launch timeline with smart scheduling"
+      },
+      "analytics": {
+        "title": "Analytics Dashboard",
+        "description": "Track performance, measure impact, and optimize your launch strategy"
+      },
+      "library": {
+        "title": "Content Library",
+        "description": "Organize all your launch assets, templates, and resources in one place"
+      }
+    },
+    "cta": {
+      "title": "Ready to Launch Smarter?",
+      "subtitle": "Join thousands of product teams who launch with confidence",
+      "button": "Start Your Free Trial"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome Back",
+      "subtitle": "Sign in to continue your launch journey",
+      "email": "Email address",
+      "password": "Password",
+      "forgotPassword": "Forgot password?",
+      "submit": "Sign In",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up",
+      "error": "Invalid email or password"
+    },
+    "register": {
+      "title": "Sign Up",
+      "subtitle": "Create your account and launch your first project",
+      "fullName": "Full Name",
+      "email": "Email address",
+      "password": "Password",
+      "submit": "Create Account",
+      "hasAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "error": "Registration failed. Please try again.",
+      "next": "Next",
+      "errors": {
+        "invalidEmail": "Please enter a valid email address",
+        "passwordTooShort": "Password must be at least 8 characters",
+        "passwordNoNumber": "Password must contain at least one number",
+        "passwordNoSpecial": "Password must contain at least one special character",
+        "passwordNoUpper": "Password must contain at least one uppercase letter",
+        "nameTooShort": "Full name must be at least 2 characters",
+        "passwordsNoMatch": "Passwords do not match"
+      }
+    }
+  },
+  "dashboard": {
+    "sidebar": {
+      "home": "Home",
+      "projects": "Projects",
+      "calendar": "Calendar",
+      "library": "Content Library",
+      "gallery": "Gallery",
+      "settings": "Settings",
+      "billing": "Billing"
+    },
+    "home": {
+      "welcome": "Welcome back",
+      "subtitle": "Here's what's happening with your launches",
+      "stats": {
+        "activeProjects": "Active Projects",
+        "contentPieces": "Content Pieces",
+        "automations": "Automations",
+        "daysToLaunch": "Days to Launch"
+      },
+      "quickActions": {
+        "title": "Quick Actions",
+        "newProject": "New Project",
+        "createContent": "Create Content",
+        "viewCalendar": "View Calendar",
+        "browseTemplates": "Browse Templates"
+      },
+      "recentProjects": {
+        "title": "Recent Projects",
+        "viewAll": "View All",
+        "empty": "No projects yet. Create your first project to get started!"
+      }
+    },
+    "projects": {
+      "title": "Your Projects",
+      "subtitle": "Manage all your product launch projects",
+      "new": "New Project",
+      "empty": "No projects yet",
+      "emptyDescription": "Create your first project to start planning your launch",
+      "createFirst": "Create Your First Project"
+    },
+    "newProject": {
+      "title": "Create New Project",
+      "subtitle": "Start planning your next successful product launch",
+      "form": {
+        "name": "Project Name",
+        "namePlaceholder": "My Awesome Product Launch",
+        "description": "Description",
+        "descriptionPlaceholder": "Brief overview of your product and launch goals",
+        "launchDate": "Target Launch Date",
+        "productType": "Product Type",
+        "productTypes": {
+          "saas": "SaaS",
+          "physical": "Physical Product",
+          "digital": "Digital Product",
+          "service": "Service",
+          "other": "Other"
+        },
+        "targetAudience": "Target Audience",
+        "targetAudiencePlaceholder": "Who is your ideal customer?",
+        "launchStrategy": "Launch Strategy",
+        "launchStrategies": {
+          "soft": "Soft Launch",
+          "beta": "Beta Launch",
+          "full": "Full Launch",
+          "presale": "Pre-sale"
+        },
+        "channels": "Marketing Channels",
+        "channelsPlaceholder": "Email, Social Media, Content Marketing...",
+        "budget": "Budget Range",
+        "budgetPlaceholder": "Estimated marketing budget",
+        "submit": "Create Project",
+        "cancel": "Cancel"
+      },
+      "success": "Project created successfully!",
+      "error": "Failed to create project. Please try again."
+    }
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "back": "Back",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success",
+    "confirm": "Confirm",
+    "close": "Close"
+  }
+}

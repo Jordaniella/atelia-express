@@ -1,0 +1,175 @@
+{
+  "nav": {
+    "features": "Fonctionnalités",
+    "pricing": "Tarifs",
+    "login": "Connexion",
+    "getStarted": "Commencer",
+    "dashboard": "Tableau de bord",
+    "logout": "Déconnexion"
+  },
+  "landing": {
+    "hero": {
+      "title": "Lancez Votre Produit avec la Précision de l'IA",
+      "subtitle": "Transformez le lancement de votre produit du chaos à la stratégie. Atelia combine des agents IA, la création de contenu visuel et des flux de travail automatisés pour vous aider à planifier, créer et exécuter des lancements réussis.",
+      "cta": "Commencer l'Essai Gratuit",
+      "demo": "Voir la Démo"
+    },
+    "features": {
+      "title": "Tout ce dont Vous Avez Besoin pour un Lancement Réussi",
+      "subtitle": "Des outils puissants conçus pour les lanceurs de produits modernes",
+      "aiAgents": {
+        "title": "Agents de Contenu IA",
+        "description": "Générez du contenu de lancement, des stratégies de positionnement et des textes marketing avec des agents IA spécialisés"
+      },
+      "visualStudio": {
+        "title": "Studio Visuel",
+        "description": "Créez de superbes visuels de produits, maquettes et assets marketing sans compétences en design"
+      },
+      "automation": {
+        "title": "Moteur d'Automatisation",
+        "description": "Construisez et déployez des flux d'automatisation marketing multi-canaux"
+      },
+      "calendar": {
+        "title": "Calendrier de Lancement",
+        "description": "Planifiez et orchestrez toute votre timeline de lancement avec une planification intelligente"
+      },
+      "analytics": {
+        "title": "Tableau de Bord Analytique",
+        "description": "Suivez les performances, mesurez l'impact et optimisez votre stratégie de lancement"
+      },
+      "library": {
+        "title": "Bibliothèque de Contenu",
+        "description": "Organisez tous vos assets de lancement, modèles et ressources en un seul endroit"
+      }
+    },
+    "cta": {
+      "title": "Prêt à Lancer Plus Intelligemment?",
+      "subtitle": "Rejoignez des milliers d'équipes produit qui lancent avec confiance",
+      "button": "Commencer l'Essai Gratuit"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Bon Retour",
+      "subtitle": "Connectez-vous pour continuer votre parcours de lancement",
+      "email": "Email",
+      "password": "Mot de passe",
+      "forgotPassword": "Mot de passe oublié?",
+      "submit": "Se Connecter",
+      "noAccount": "Pas encore de compte?",
+      "signUp": "S'inscrire",
+      "error": "Email ou mot de passe invalide"
+    },
+    "register": {
+      "title": "Commencez Votre Parcours",
+      "subtitle": "Créez votre compte et lancez votre premier projet",
+      "fullName": "Nom Complet",
+      "email": "Email",
+      "password": "Mot de passe",
+      "submit": "Créer un Compte",
+      "hasAccount": "Vous avez déjà un compte?",
+      "signIn": "Se connecter",
+      "error": "Échec de l'inscription. Veuillez réessayer.",
+      "next": "Suivant",
+      "errors": {
+        "invalidEmail": "Veuillez entrer une adresse email valide",
+        "passwordTooShort": "Le mot de passe doit comporter au moins 8 caractères",
+        "passwordNoNumber": "Le mot de passe doit contenir au moins un chiffre",
+        "passwordNoSpecial": "Le mot de passe doit contenir au moins un caractère spécial",
+        "passwordNoUpper": "Le mot de passe doit contenir au moins une lettre majuscule",
+        "nameTooShort": "Le nom complet doit comporter au moins 2 caractères",
+        "passwordsNoMatch": "Les mots de passe ne correspondent pas"
+      }
+    }
+  },
+  "dashboard": {
+    "sidebar": {
+      "home": "Accueil",
+      "projects": "Projets",
+      "calendar": "Calendrier",
+      "library": "Bibliothèque de Contenu",
+      "gallery": "Galerie",
+      "settings": "Paramètres",
+      "billing": "Facturation"
+    },
+    "home": {
+      "welcome": "Bon retour",
+      "subtitle": "Voici ce qui se passe avec vos lancements",
+      "stats": {
+        "activeProjects": "Projets Actifs",
+        "contentPieces": "Contenus",
+        "automations": "Automatisations",
+        "daysToLaunch": "Jours avant Lancement"
+      },
+      "quickActions": {
+        "title": "Actions Rapides",
+        "newProject": "Nouveau Projet",
+        "createContent": "Créer du Contenu",
+        "viewCalendar": "Voir le Calendrier",
+        "browseTemplates": "Parcourir les Modèles"
+      },
+      "recentProjects": {
+        "title": "Projets Récents",
+        "viewAll": "Voir Tout",
+        "empty": "Aucun projet pour le moment. Créez votre premier projet pour commencer!"
+      }
+    },
+    "projects": {
+      "title": "Vos Projets",
+      "subtitle": "Gérez tous vos projets de lancement de produits",
+      "new": "Nouveau Projet",
+      "empty": "Aucun projet pour le moment",
+      "emptyDescription": "Créez votre premier projet pour commencer à planifier votre lancement",
+      "createFirst": "Créer Votre Premier Projet"
+    },
+    "newProject": {
+      "title": "Créer un Nouveau Projet",
+      "subtitle": "Commencez à planifier votre prochain lancement de produit réussi",
+      "form": {
+        "name": "Nom du Projet",
+        "namePlaceholder": "Mon Super Lancement de Produit",
+        "description": "Description",
+        "descriptionPlaceholder": "Aperçu de votre produit et objectifs de lancement",
+        "launchDate": "Date de Lancement Cible",
+        "productType": "Type de Produit",
+        "productTypes": {
+          "saas": "SaaS",
+          "physical": "Produit Physique",
+          "digital": "Produit Numérique",
+          "service": "Service",
+          "other": "Autre"
+        },
+        "targetAudience": "Public Cible",
+        "targetAudiencePlaceholder": "Qui est votre client idéal?",
+        "launchStrategy": "Stratégie de Lancement",
+        "launchStrategies": {
+          "soft": "Lancement Doux",
+          "beta": "Lancement Bêta",
+          "full": "Lancement Complet",
+          "presale": "Prévente"
+        },
+        "channels": "Canaux Marketing",
+        "channelsPlaceholder": "Email, Réseaux Sociaux, Marketing de Contenu...",
+        "budget": "Fourchette de Budget",
+        "budgetPlaceholder": "Budget marketing estimé",
+        "submit": "Créer le Projet",
+        "cancel": "Annuler"
+      },
+      "success": "Projet créé avec succès!",
+      "error": "Échec de la création du projet. Veuillez réessayer."
+    }
+  },
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "create": "Créer",
+    "back": "Retour",
+    "loading": "Chargement...",
+    "error": "Une erreur s'est produite",
+    "success": "Succès",
+    "confirm": "Confirmer",
+    "close": "Fermer"
+  }
+}

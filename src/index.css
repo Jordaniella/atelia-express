@@ -1,0 +1,162 @@
+/* @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"); */
+
+@import url("https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap");
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* --color-deep-black: #0e0e11;
+    --color-ai-purple: #6c5ce7;
+    --color-cyan-accent: #00d4ff;
+    --color-white-off: #f8f9fa;
+    --color-gray-dark: #1a1a1f;
+    --color-gray-medium: #2d2d35;
+    --color-gray-light: #48484f; */
+    /* Brand */
+    --brand-primary: #f1f85d;
+    --brand-secondary: #9ba100;
+
+    /* Background / Surfaces (LIGHT by default) */
+
+    --bg-primary: #141414;
+    --bg-medium-primary: #252527;
+    --bg-secondary: #2a2a2c;
+    --bg-white: #ffffff;
+
+    --text-primary: #f7f7f7;
+    --text-secondary: #e2e2e2;
+    --text-muted: #9c9c9c;
+    --text-subtle: #5a5a5a;
+
+    /* Radius */
+
+    --radius-xs: 8px;
+    --radius-sm: 12px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+    --radius-xl: 48px;
+    --radius-full: 1000px;
+
+    /* Specific components */
+
+    --radius-button: var(
+      --radius-full
+    ); /* Fully rounded for pill-shaped buttons */
+    --radius-card: var(--radius-lg);
+    --radius-input: var(--radius-full);
+    --radius-modal: var(--radius-lg);
+
+    /* Border width */
+
+    --border-thin: 1.5px;
+    --border-medium: 2px;
+  }
+
+  /* Dark mode override */
+  [data-theme="dark"] {
+    --bg-primary: #ffffff;
+    --bg-medium-primary: #f7f7f7;
+    --bg-secondary: #f7f7f7;
+    --bg-white: #141414; /* (ton "bg-white" côté dark inversé, ici pour usages particuliers) */
+
+    /* Text (LIGHT) */
+    --text-primary: #040404;
+    --text-secondary: #383838;
+    --text-muted: #9c9c9c;
+    --text-subtle: #5a5a5a; /* ton text-black-color */
+  }
+
+  * {
+    border-color: var(--color-gray-medium);
+  }
+
+  body {
+    font-family:
+      /* "Roboto Mono", */
+      "Lato",
+      system-ui,
+      -apple-system,
+      sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-secondary);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-semibold;
+    line-height: 1.2;
+  }
+
+  h1 {
+    @apply text-5xl md:text-6xl lg:text-7xl;
+  }
+
+  h2 {
+    @apply text-4xl md:text-5xl;
+  }
+
+  h3 {
+    @apply text-3xl md:text-4xl;
+  }
+
+  p {
+    line-height: 1.5;
+  }
+  .center-block {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+@layer utilities {
+  @keyframes slide-up {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.3s ease-out;
+  }
+
+  .glass-effect {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10;
+  }
+
+  .gradient-purple {
+    background: linear-gradient(
+      135deg,
+      var(--color-ai-purple) 0%,
+      #8b7fe8 100%
+    );
+  }
+
+  .gradient-cyan {
+    background: linear-gradient(
+      135deg,
+      var(--color-cyan-accent) 0%,
+      #00a8cc 100%
+    );
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(
+      135deg,
+      var(--color-ai-purple) 0%,
+      var(--color-cyan-accent) 100%
+    );
+  }
+}
