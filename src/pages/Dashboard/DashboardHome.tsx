@@ -123,7 +123,7 @@ export function DashboardHome() {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-screen">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--color-ai-purple)]"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--brand-primary)]"></div>
         </div>
       </DashboardLayout>
     );
@@ -156,7 +156,7 @@ export function DashboardHome() {
               </Button>
             </Link>
             <h1 className="text-4xl mb-2">{project.name}</h1>
-            <p className="text-gray-400">{project.description}</p>
+            <p className="text-gray-300">{project.description}</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
@@ -165,14 +165,14 @@ export function DashboardHome() {
                 <div className="flex items-center justify-between">
                   <div>
                     <h2 className="text-2xl mb-2">Launch Readiness</h2>
-                    <p className="text-gray-400">Your overall preparation score</p>
+                    <p className="text-gray-300">Your overall preparation score</p>
                   </div>
                   <div className="text-right">
                     <div className="flex items-center gap-2">
-                      <TrendingUp className="w-6 h-6 text-[var(--color-ai-purple)]" />
+                      <TrendingUp className="w-6 h-6 text-[var(--brand-primary)]" />
                       <span className="text-4xl font-bold">{calculateOverallReadiness()}%</span>
                     </div>
-                    <p className="text-sm text-gray-400 mt-1">Ready to Launch</p>
+                    <p className="text-sm text-gray-300 mt-1">Ready to Launch</p>
                   </div>
                 </div>
 
@@ -180,16 +180,16 @@ export function DashboardHome() {
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <FileText className="w-5 h-5 text-[var(--color-ai-purple)]" />
+                        <FileText className="w-5 h-5 text-[var(--text-primary)]" />
                         <span className="font-medium">Content</span>
                       </div>
-                      <span className="text-sm text-gray-400">
+                      <span className="text-sm text-gray-300">
                         {readiness.content.current}/{readiness.content.target}
                       </span>
                     </div>
                     <div className="h-2 bg-white/10 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-gradient-to-r from-[var(--color-ai-purple)] to-purple-400 transition-all duration-500"
+                        className="h-full bg-gradient-to-r from-[var(--brand-primary)] to-purple-400 transition-all duration-500"
                         style={{ width: `${(readiness.content.current / readiness.content.target) * 100}%` }}
                       />
                     </div>
@@ -198,16 +198,16 @@ export function DashboardHome() {
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <Image className="w-5 h-5 text-[var(--color-cyan-accent)]" />
+                        <Image className="w-5 h-5 text-[var(--text-primary)]" />
                         <span className="font-medium">Visuals</span>
                       </div>
-                      <span className="text-sm text-gray-400">
+                      <span className="text-sm text-gray-300">
                         {readiness.visuals.current}/{readiness.visuals.target}
                       </span>
                     </div>
                     <div className="h-2 bg-white/10 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-gradient-to-r from-[var(--color-cyan-accent)] to-blue-400 transition-all duration-500"
+                        className="h-full bg-gradient-to-r from-[var(--brand-secondary)] to-blue-400 transition-all duration-500"
                         style={{ width: `${(readiness.visuals.current / readiness.visuals.target) * 100}%` }}
                       />
                     </div>
@@ -216,10 +216,10 @@ export function DashboardHome() {
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <Workflow className="w-5 h-5 text-green-500" />
+                        <Workflow className="w-5 h-5 text-[var(--brand-primary)]" />
                         <span className="font-medium">Automation</span>
                       </div>
-                      <span className="text-sm text-gray-400">
+                      <span className="text-sm text-gray-300">
                         {readiness.automation.current}/{readiness.automation.target}
                       </span>
                     </div>
@@ -238,42 +238,42 @@ export function DashboardHome() {
               <div className="space-y-6">
                 <div>
                   <h2 className="text-2xl mb-2">Launch Strategy Snapshot</h2>
-                  <p className="text-gray-400">Your core messaging framework</p>
+                  <p className="text-gray-300">Your core messaging framework</p>
                 </div>
 
                 <div className="space-y-4">
                   <div className="flex items-start gap-3">
-                    <Target className="w-5 h-5 text-[var(--color-ai-purple)] mt-1 flex-shrink-0" />
+                    <Target className="w-5 h-5 text-[var(--text-primary)] mt-1 flex-shrink-0" />
                     <div>
-                      <p className="text-sm text-gray-400 mb-1">Positioning</p>
-                      <p className="text-sm">{project.positioning_statement || 'Not defined yet'}</p>
+                      <p className="text-sm text-[var(--text-primary)] mb-1">Positioning</p>
+                      <p className="text-sm text-[var(--text-muted)]">{project.positioning_statement || 'Not defined yet'}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <Lightbulb className="w-5 h-5 text-[var(--color-cyan-accent)] mt-1 flex-shrink-0" />
                     <div>
-                      <p className="text-sm text-gray-400 mb-1">Core Promise</p>
-                      <p className="text-sm">{project.core_promise || 'Not defined yet'}</p>
+                      <p className="text-sm text-[var(--text-primary)] mb-1">Core Promise</p>
+                      <p className="text-sm text-[var(--text-muted)]">{project.core_promise || 'Not defined yet'}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <Zap className="w-5 h-5 text-yellow-500 mt-1 flex-shrink-0" />
+                    <Zap className="w-5 h-5 text-[var(--brand-primary)] mt-1 flex-shrink-0" />
                     <div>
-                      <p className="text-sm text-gray-400 mb-1">Unique Mechanism</p>
-                      <p className="text-sm">{project.unique_mechanism || 'Not defined yet'}</p>
+                      <p className="text-sm text-[var(--text-primary)] mb-1">Unique Mechanism</p>
+                      <p className="text-sm text-[var(--text-muted)]">{project.unique_mechanism || 'Not defined yet'}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <Gift className="w-5 h-5 text-green-500 mt-1 flex-shrink-0" />
+                    <Gift className="w-5 h-5 text-[var(--brand-primary)] mt-1 flex-shrink-0" />
                     <div>
-                      <p className="text-sm text-gray-400 mb-1">Key Offer</p>
-                      <p className="text-sm">{project.key_offer || 'Not defined yet'}</p>
+                      <p className="text-sm text-[var(--brand-primary)] mb-1">Key Offer</p>
+                      <p className="text-sm text-[var(--text-muted)]">{project.key_offer || 'Not defined yet'}</p>
                     </div>
                   </div>
                 </div>
 
                 <Link to={`/dashboard/project/${projectId}/details`}>
-                  <Button variant="ghost" className="w-full text-sm">
+                  <Button variant="ghost" className="w-full text-sm mt-2">
                     Edit Strategy
                   </Button>
                 </Link>
@@ -284,12 +284,12 @@ export function DashboardHome() {
           <div className="grid md:grid-cols-3 gap-6">
             <Card>
               <div className="flex items-center gap-4">
-                <div className="p-3 rounded-xl bg-[var(--color-ai-purple)]/10">
-                  <FileText className="w-6 h-6 text-[var(--color-ai-purple)]" />
+                <div className="p-3 rounded-xl bg-[var(--brand-primary)]/10">
+                  <FileText className="w-6 h-6 text-[var(--text-primary)]" />
                 </div>
                 <div>
                   <p className="text-3xl font-bold">{stats.totalContent}</p>
-                  <p className="text-sm text-gray-400">Content Assets</p>
+                  <p className="text-sm text-[var(--text-muted)]">Content Assets</p>
                 </div>
               </div>
             </Card>
@@ -309,7 +309,7 @@ export function DashboardHome() {
             <Card>
               <div className="flex items-center gap-4">
                 <div className="p-3 rounded-xl bg-green-500/10">
-                  <Workflow className="w-6 h-6 text-green-500" />
+                  <Workflow className="w-6 h-6 text-[var(--brand-primary)]" />
                 </div>
                 <div>
                   <p className="text-3xl font-bold">{stats.totalAutomations}</p>
@@ -325,8 +325,8 @@ export function DashboardHome() {
               <Link to={`/dashboard/project/${projectId}/content`}>
                 <Card hover>
                   <div className="space-y-4">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                      <Sparkles className="w-8 h-8 text-white" />
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                      <Sparkles className="w-6 h-6 text-white" />
                     </div>
                     <div>
                       <h3 className="text-xl font-semibold mb-2">Generate Content</h3>
@@ -339,8 +339,8 @@ export function DashboardHome() {
               <Link to={`/dashboard/project/${projectId}/visuals`}>
                 <Card hover>
                   <div className="space-y-4">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
-                      <Image className="w-8 h-8 text-white" />
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
+                      <Image className="w-6 h-6 text-white" />
                     </div>
                     <div>
                       <h3 className="text-xl font-semibold mb-2">AI Visual Studio</h3>
@@ -353,8 +353,8 @@ export function DashboardHome() {
               <Link to={`/dashboard/project/${projectId}/automation`}>
                 <Card hover>
                   <div className="space-y-4">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center">
-                      <Zap className="w-8 h-8 text-white" />
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center">
+                      <Zap className="w-6 h-6 text-white" />
                     </div>
                     <div>
                       <h3 className="text-xl font-semibold mb-2">Automation Engine</h3>

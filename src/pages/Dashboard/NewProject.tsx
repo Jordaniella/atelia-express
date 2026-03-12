@@ -1,6 +1,6 @@
 import { useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Calendar, FolderOpen, PaletteIcon } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../../components/ui/Button';
@@ -68,17 +68,19 @@ export function NewProject() {
     <DashboardLayout>
       <div className="p-8">
         <div className="max-w-3xl mx-auto space-y-8">
-          <div>
+          <div className='flex gap-3 flex-wrap h-full'>
             <Button
               variant="ghost"
               onClick={() => navigate('/dashboard')}
               className="mb-4"
             >
               <ArrowLeft className="w-5 h-5" />
-              Back to Dashboard
+              {/* Back to Dashboard */}
             </Button>
-            <h1 className="text-4xl mb-2">Create Launch Project</h1>
-            <p className="text-gray-400">Define your product and launch strategy</p>
+            <div>
+              <h3 className="text-2xl mb-2">Create Launch Project</h3>
+              <p className="text-gray-400">Define your product and launch strategy</p>
+            </div>
           </div>
 
           <Card>
@@ -95,7 +97,9 @@ export function NewProject() {
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
-              />
+              >
+                <FolderOpen className='w-4 h-4 text-[var(--text-secondary)]'/>
+              </Input>
 
               <Textarea
                 label="Description"
@@ -120,14 +124,19 @@ export function NewProject() {
                 placeholder="e.g., Professional, Friendly, Bold, Luxurious"
                 value={formData.brandTone}
                 onChange={(e) => setFormData({ ...formData, brandTone: e.target.value })}
-              />
-
+              
+              >
+                <PaletteIcon className='w-4 h-4 text-[var(--text-secondary)]'/>
+              </Input>
               <Input
                 label="Launch Date (Optional)"
                 type="date"
                 value={formData.launchDate}
                 onChange={(e) => setFormData({ ...formData, launchDate: e.target.value })}
-              />
+              
+              >
+                <Calendar className='w-4 h-4 text-[var(--text-secondary)]'/>
+              </Input>
 
               <div className="flex items-center gap-4 pt-4">
                 <Button type="submit" isLoading={loading}>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Calendar, Clock, AlertCircle, Sparkles } from 'lucide-react';
+import { Plus, Calendar, Clock, AlertCircle, Sparkles, User } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../../components/ui/Button';
@@ -79,7 +79,7 @@ export function ProjectsList() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-4xl mb-2">Welcome back, {userName || 'User'}</h1>
-              <p className="text-gray-400">Manage your launch projects</p>
+              <p>Manage your launch projects</p>
             </div>
             <div className="flex items-center gap-4">
               {isTrial && trialDaysLeft !== null && (
@@ -111,8 +111,8 @@ export function ProjectsList() {
             <div className="p-4 rounded-lg bg-gradient-to-br from-[var(--color-ai-purple)]/10 to-purple-600/10 border border-[var(--color-ai-purple)]/30 flex items-start gap-3">
               <AlertCircle className="w-5 h-5 text-[var(--color-ai-purple)] flex-shrink-0 mt-0.5" />
               <div className="flex-1">
-                <p className="font-medium text-white mb-1">You're on a Trial Plan</p>
-                <p className="text-sm text-gray-400 mb-3">
+                <p className="font-medium mb-1">You're on a Trial Plan</p>
+                <p className="text-sm mb-3">
                   You have {trialDaysLeft} day{trialDaysLeft !== 1 ? 's' : ''} left with {generationsLeft} email generation{generationsLeft !== 1 ? 's' : ''} remaining.
                   Upgrade to unlock all content types, visual studio, automation, and more.
                 </p>
@@ -140,7 +140,7 @@ export function ProjectsList() {
                     <Plus className="w-8 h-8 text-[var(--color-ai-purple)]" />
                   </div>
                   <h3 className="text-xl mb-2">No projects yet</h3>
-                  <p className="text-gray-400 mb-6">Create your first launch project to get started</p>
+                  <p className="mb-6">Create your first launch project to get started</p>
                   <Link to="/dashboard/new">
                     <Button>
                       <Plus className="w-5 h-5" />
@@ -162,11 +162,11 @@ export function ProjectsList() {
                           </span>
                         </div>
 
-                        <p className="text-gray-400 text-sm line-clamp-2">
+                        <p className=" text-sm line-clamp-2 text-[var(--text-muted)]">
                           {project.description}
                         </p>
 
-                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
                           <Calendar className="w-4 h-4" />
                           <span>{formatDate(project.created_at)}</span>
                         </div>

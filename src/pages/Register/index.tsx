@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import CAuth from "../Login/style";
 import Logo from "@/components/Logo";
 import Stepper from "@/components/ui/Stepper";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, MailWarning, Mail, Lock, User } from "lucide-react";
 import { useToast } from "@/contexts/ToastContext";
 import { isEmailValid } from "@/features/auth/helper";
 
@@ -84,7 +84,7 @@ export const RegisterPage = () => {
                 }}
                 variant="ghost"
               >
-                <ArrowLeft className="w-5 h-5" />
+                <ArrowLeft className="w-4 h-4" />
                 Prev
               </Button>
             )}
@@ -120,14 +120,19 @@ export const RegisterPage = () => {
                   placeholder="your@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  icon="email"
                   error={
                     email && !isEmailValid(email)
                       ? translateApp("auth.register.errors.invalidEmail")
                       : undefined
                   }
                   required
-                />
+                >
+                  {email && !isEmailValid(email) ? (
+                    <MailWarning className="text-red-500" />
+                  ) : (
+                    <Mail className="w-4 h-4 text-gray-400" />
+                  )}
+                </Input>
                 <Button
                   type="button"
                   className="w-full"
@@ -148,14 +153,17 @@ export const RegisterPage = () => {
                   placeholder="John Doe"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  icon="user"
                   error={
                     name.length < 2 && name.length > 0
                       ? "Name must be at least 2 characters"
                       : undefined
                   }
                   required
-                />
+                >
+                  <User
+                    className={`w-4 h-4 ${name.length < 2 && name.length > 0 ? "text-red-500" : "text-gray-400"}`}
+                  />
+                </Input>
                 <Button
                   type="button"
                   className="w-full"
@@ -192,7 +200,11 @@ export const RegisterPage = () => {
                             : undefined
                   }
                   required
-                />
+                >
+                  <Lock
+                    className={`w-4 h-4 ${password && (checkPasswordStrength(password).upper || checkPasswordStrength(password).noSpecial || checkPasswordStrength(password).short || checkPasswordStrength(password).noNumber) ? "text-red-500" : "text-gray-400"}`}
+                  />
+                </Input>
 
                 <Input
                   label="Confirm Password"
@@ -206,7 +218,11 @@ export const RegisterPage = () => {
                       : undefined
                   }
                   required
-                />
+                >
+                  <Lock
+                    className={`w-4 h-4 ${confirmPassword.length > 0 && !similarPassword() ? "text-red-500" : "text-gray-400"}`}
+                  />
+                </Input>
 
                 <Button type="submit" className="w-full" isLoading={loading}>
                   {translateApp("auth.register.submit")}

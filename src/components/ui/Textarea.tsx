@@ -10,7 +10,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
     return (
       <div className="space-y-2">
         {label && (
-          <label className="block text-sm font-medium text-gray-300">
+          <label className="text-[1rem] font-medium text-[var(--text-primary)]  ">
             {label}
           </label>
         )}

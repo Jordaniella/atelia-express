@@ -1,5 +1,57 @@
+import { i } from "framer-motion/client";
 import { ButtonHTMLAttributes, ReactNode } from "react";
-import { motion } from "framer-motion";
+import styled from "styled-components";
+
+const ButtonBase = styled.button`
+  @property --angle {
+    syntax: "<angle>";
+    initial-value: 60deg;
+    inherits: false;
+  }
+  position: relative;
+  padding:8px 20px; 
+  &.primary {
+    &:after {
+      transform: scale(1.01, 1.09);
+      background: conic-gradient(from var(--angle),transparent, var(--brand-secondary));
+      animation: rotate 2s linear infinite;
+    }
+    &:before {
+      transform: scale(1.07, 1.25);
+      background: #ffffff;
+    }
+    &:after, &:before {
+      opacity: 0;
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 1000px;
+      z-index: -1;
+      padding: 3px;
+      transition: opacity 0.2s 0.3s ease, transform 0.5s ease;
+    }
+  }
+  &.primary:hover { 
+  background: radial-gradient(circle at bottom, var(--brand-primary), var(--brand-secondary));
+   
+  &:after {
+      opacity: 1;
+      transform: scale(1.01, 1.09);
+    }
+    &:before {
+      opacity: 0.2;
+    }
+  }
+  @keyframes rotate {
+    from {
+      --angle: 0deg;
+    }
+      to {
+      --angle: 360deg;
+    }
+  }
+` 
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
@@ -23,11 +75,11 @@ export const Button = ({
   const variants = {
     primary:
       // "bg-[linear-gradient(135deg,_var(--brand-primary)_50%,_var(--brand-secondary)_100%)] hover:bg-[var(--brand-primary)] text-black shadow-lg shadow-[rgba(0,0,0,0.1)] px-6 py-5",
-      "bg-[var(--brand-primary)] hover:bg-[var(--brand-primary)] text-black shadow-lg shadow-[rgba(0,0,0,0.1)] px-6 py-5",
+      "bg-[var(--brand-primary)] hover:bg-[var(--brand-primary)] text-black shadow-lg shadow-[rgba(0,0,0,0.1)]",
 
-    secondary: "glass-effect hover:bg-white/10 text-white px-6 py-5",
-    ghost: "text-gray-300 hover:text-white hover:bg-white/5 px-6 py-5",
-    danger: "bg-red-600 hover:bg-red-700 text-white px-6 py-5",
+    secondary: "glass-effect hover:bg-white/10 text-white",
+    ghost: "text-gray-300 hover:text-white hover:bg-white/5",
+    danger: "bg-red-600 hover:bg-red-700 text-white",
   };
 
   const sizes = {
@@ -37,10 +89,8 @@ export const Button = ({
   };
 
   return (
-    <motion.button
-      whileHover={{ scale: disabled || isLoading ? 1 : 1.02 }}
-      whileTap={{ scale: disabled || isLoading ? 1 : 0.98 }}
-      className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}
+    <ButtonBase
+      className={`${baseStyles} ${variants[variant]} ${className} ${variant}`}
       disabled={disabled || isLoading}
       {...props}
     >
@@ -71,6 +121,6 @@ export const Button = ({
       ) : (
         children
       )}
-    </motion.button>
+    </ButtonBase>
   );
 };

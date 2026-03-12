@@ -1,21 +1,20 @@
 import { InputHTMLAttributes, forwardRef, useState } from "react";
-import { Eye, EyeOff, Lock, Mail, MailWarning, User } from "lucide-react";
+import { Eye, EyeOff, Lock, LucideIcon, Mail, MailWarning, User } from "lucide-react";
 import styled from "styled-components";
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
-  icon?: string;
 }
 
 const CIcon = styled.div`
   position: absolute;
   left: 16px;
-  top: 23px;
+  top: 13px;
   & + input {
     padding-left: 44px;
-    padding-top: 20px;
-    padding-bottom: 20px;
+    padding-top: 8px;
+    padding-bottom: 8px;
     padding-right: 12px;
     &:-webkit-autofill,
     &:-webkit-autofill:hover,
@@ -35,7 +34,7 @@ const CIcon = styled.div`
 `;
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, className = "", type, icon, ...props }, ref) => {
+  ({ label, error, className = "", type, children, ...props }, ref) => {
     const [showPassword, setShowPassword] = useState(false);
     const isPasswordField = type === "password";
     const inputType = isPasswordField && showPassword ? "text" : type;
@@ -43,13 +42,13 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="space-y-2">
         {label && (
-          <label className="block text-[1rem] font-medium text-gray-300">
+          <label className="block text-[1rem] font-medium text-[var(--text-primary)]">
             {label}
           </label>
         )}
         <div className="relative">
           <CIcon>
-            {icon === "email" ? (
+            {/* {icon === "email" ? (
               error ? (
                 <MailWarning className="text-red-500" />
               ) : (
@@ -63,7 +62,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               <Lock
                 className={`w-5 h-5 ${error ? "text-red-500" : "text-gray-400"}`}
               />
-            )}
+            )} */}
+            {children}
           </CIcon>
           <input
             ref={ref}

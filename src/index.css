@@ -52,10 +52,13 @@
 
     --border-thin: 1.5px;
     --border-medium: 2px;
+    /* Thumb */
+    --bg-primary-thumb: #ffffff;
+    --bg-secondary-thumb: #2a2a2c;
   }
 
   /* Dark mode override */
-  [data-theme="dark"] {
+  [data-theme="light"] {
     --bg-primary: #ffffff;
     --bg-medium-primary: #f7f7f7;
     --bg-secondary: #f7f7f7;
@@ -66,12 +69,44 @@
     --text-secondary: #383838;
     --text-muted: #9c9c9c;
     --text-subtle: #5a5a5a; /* ton text-black-color */
+
+    
+    --bg-primary-thumb: #141414;
+    --bg-secondary-thumb: #2a2a2c;
   }
 
   * {
-    border-color: var(--color-gray-medium);
+    /* border-color: var(--color-gray-medium); */
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
   }
 
+  /* Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--bg-primary-thumb) var(--bg-secondary-thumb);
+  }
+
+  /* Chrome / Edge / Safari */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--bg-secondary-thumb);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--bg-primary-thumb);
+    border-radius: 999px;
+    border: 3px solid var(--bg-secondary-thumb);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #dbe33f;
+  }
   body {
     font-family:
       /* "Roboto Mono", */
@@ -91,6 +126,7 @@
   h6 {
     @apply font-semibold;
     line-height: 1.2;
+    color: var(--text-primary)
   }
 
   h1 {
@@ -107,6 +143,7 @@
 
   p {
     line-height: 1.5;
+    color: var(--text-secondary);
   }
   .center-block {
     display: flex;

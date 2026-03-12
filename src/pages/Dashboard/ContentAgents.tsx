@@ -13,6 +13,7 @@ import { UpgradePrompt } from '../../components/UpgradePrompt';
 import { useSubscription } from '../../contexts/SubscriptionContext';
 import { ExportModal } from '../../components/ExportModal';
 import { ConnectPlatformModal } from '../../components/ConnectPlatformModal';
+import { SelectForm } from '@/components/ui/SelectForm';
 
 interface ContentAsset {
   id: string;
@@ -295,7 +296,7 @@ export function ContentAgents() {
                     <label className="block text-sm font-medium text-gray-300 mb-2">
                       Tone
                     </label>
-                    <select
+                    {/* <select
                       value={tone}
                       onChange={(e) => setTone(e.target.value)}
                       className="w-full px-4 py-3 rounded-xl bg-[var(--color-gray-dark)] border border-[var(--color-gray-medium)] text-white focus:outline-none focus:ring-2 focus:ring-[var(--color-ai-purple)]"
@@ -304,7 +305,19 @@ export function ContentAgents() {
                       <option value="friendly">Friendly</option>
                       <option value="bold">Bold</option>
                       <option value="luxury">Luxury</option>
-                    </select>
+                    </select> */}
+                    <SelectForm
+                      label="Brand Tone"
+                      value={tone}
+                      onChange={(e) => setTone(e.target.value)}
+                      placeholder="Select a tone"
+                      options={[
+                        { value: "professional", label: "Professional" },
+                        { value: "friendly", label: "Friendly" },
+                        { value: "bold", label: "Bold" },
+                        { value: "luxury", label: "Luxury" },
+                      ]}
+                    />
                   </div>
 
                   <Button onClick={handleGenerate} isLoading={loading} className="w-full">

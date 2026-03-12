@@ -1,11 +1,12 @@
 import { ReactNode, useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation, useParams } from 'react-router-dom';
-import { Sparkles, LayoutDashboard, Package, Calendar, FolderOpen, Settings, LogOut, User, ChevronDown, Library, CreditCard, Crown } from 'lucide-react';
+import { Search, LayoutDashboard,FolderOpenIcon , Package, Calendar, FolderOpen, Settings, LogOut, User, ChevronDown, Library, CreditCard, Crown, FolderOpenDot } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { Button } from '../ui/Button';
 import { LanguageSelector } from '../LanguageSelector';
 import { useSubscription } from '../../contexts/SubscriptionContext';
+import Logo from '../Logo';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -54,7 +55,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const isProjectView = !!projectId;
 
   const navItems = [
-    { icon: LayoutDashboard, label: 'Projects', path: '/dashboard' },
+    { icon: FolderOpenIcon, label: 'Projects', path: '/dashboard' },
     { icon: CreditCard, label: 'Billing', path: '/dashboard/billing' },
     { icon: Settings, label: 'Settings', path: '/dashboard/settings' },
   ];
@@ -70,15 +71,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <div className="min-h-screen flex">
-      <aside className="w-64 glass-effect border-r border-white/10 flex flex-col">
-        <div className="p-6 border-b border-white/10">
-          <Link to="/dashboard" className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-[var(--color-ai-purple)]">
-              <Sparkles className="w-6 h-6 text-white" />
-            </div>
-            <span className="text-xl font-bold">AtelIA</span>
-          </Link>
+    <div className="min-h-screen max-h-[100vh] overflow-x-hidden overflow-y-auto flex px-2 py-3 background gap-2">
+      <aside className="w-64 bg-[var(--bg-secondary)] rounded-xl flex flex-col">
+        <div className="px-6 pt-6 pb-2">
+          <Logo size="md" />
         </div>
 
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
@@ -87,9 +83,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               key={item.path}
               to={item.path}
               className={`
-                flex items-center gap-3 px-4 py-3 rounded-xl transition-all
+                flex items-center gap-3 px-4 py-2 rounded-lg transition-all
                 ${isActive(item.path)
-                  ? 'bg-[var(--color-ai-purple)] text-white'
+                  ? 'bg-[var(--bg-primary)] text-white'
                   : 'text-gray-300 hover:bg-white/5 hover:text-white'
                 }
               `}
@@ -149,24 +145,16 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <LanguageSelector />
           </div>
           <Link to="/dashboard/billing">
-            <div className="px-4 py-2 rounded-xl bg-gradient-to-r from-[var(--color-ai-purple)]/10 to-purple-600/10 border border-[var(--color-ai-purple)]/30 hover:border-[var(--color-ai-purple)]/50 transition-colors cursor-pointer">
+            <div className="px-4 py-2 rounded-xl bg-gradient-to-r from-[var(--brand-primary)]/10 to-purple-600/10 border border-[var(--brand-primary)] hover:border-[var(--brand-primary)]/50 transition-colors cursor-pointer">
               <div className="flex items-center gap-2 mb-1">
                 <Crown className="w-4 h-4 text-[var(--color-ai-purple)]" />
                 <span className="text-xs font-medium text-gray-400">Current Plan</span>
               </div>
-              <p className="text-sm font-semibold text-white capitalize">
+              <p className="text-sm font-semibold text-[var(--brand-primary)] capitalize">
                 {subscription?.plan || 'Free'}
               </p>
             </div>
           </Link>
-          <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/5">
-            <div className="w-8 h-8 rounded-full bg-[var(--color-ai-purple)] flex items-center justify-center">
-              <User className="w-5 h-5" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{user?.email}</p>
-            </div>
-          </div>
           <Button
             variant="ghost"
             className="w-full justify-start"
@@ -177,9 +165,22 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </Button>
         </div>
       </aside>
-
-      <main className="flex-1 overflow-auto">
-        {children}
+      <main className='flex-1 overflow-hidden flex flex-col gap-2'>
+        <div className="flex justify-between p-3 bg-[var(--bg-secondary)] rounded-xl">
+          <label htmlFor="search-atelia" className='flex items-center relative'>
+              <Search className="w-4 h-4 text-gray-500 absolute left-3" />
+            <input id='search-atelia' type="text" className='min-w-80 pt-2 pb-2 ps-11 bg-[var(--bg-primary)] text-white placeholder:text-[var(--text-secondary)] rounded-full focus:outline-none focus:ring-2 focus:ring-[var(--color-ai-purple)]' placeholder='Search...' />
+          </label>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center">
+              <User className="w-5 h-5 text-black" />
+            </div>
+            {/* <div class                                                                               */}
+          </div>
+        </div>
+        <div className="flex-1 bg-[var(--bg-secondary)] h-full rounded-xl overflow-x-hidden overflow-y-auto">
+          {children}
+        </div>
       </main>
     </div>
   );

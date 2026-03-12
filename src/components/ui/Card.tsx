@@ -11,7 +11,7 @@ interface CardProps {
 export function Card({ children, className = '', hover = false, gradient = false }: CardProps) {
   const baseStyles = gradient
     ? 'rounded-2xl p-[1px] gradient-purple'
-    : 'glass-effect rounded-2xl shadow-xl';
+    : 'bg-[var(--bg-primary)] rounded-2xl shadow-xl';
 
   return (
     <motion.div
@@ -26,7 +26,7 @@ export function Card({ children, className = '', hover = false, gradient = false
             {children}
           </div>
         ) : (
-          <div className="p-8">
+          <div className="px-8 py-5">
             {children}
           </div>
         )}

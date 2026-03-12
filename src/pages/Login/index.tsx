@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Sparkles } from "lucide-react";
+import { MailWarning, Mail, Lock, User } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
@@ -41,7 +41,7 @@ const LoginPage = () => {
           </div>
 
           <form onSubmit={handleSubmit}>
-            {error && <div>{error}</div>}
+            {error && <div className="text-red-500 p-2 text-center border-[#e50000] border-[1.5px] rounded-md">{error}</div>}
 
             <Input
               label={translateApp("auth.login.email")}
@@ -50,8 +50,12 @@ const LoginPage = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              icon="email"
-            />
+            > {error ? (
+                <MailWarning className="text-red-500" />
+              ) : (
+                <Mail className="w-4 h-4 text-gray-400" />
+              )}
+            </Input>
 
             <Input
               label={translateApp("auth.login.password")}
@@ -60,7 +64,11 @@ const LoginPage = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-            />
+            >
+              <Lock
+                className={`w-4 h-4 ${error ? "text-red-500" : "text-gray-400"}`}
+              />
+            </Input>
 
             <Button type="submit" isLoading={loading}>
               {translateApp("auth.login.submit")}
