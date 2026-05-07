@@ -2,16 +2,20 @@ services:
   postgres:
     image: postgres:18
     container_name: atelia_postgres
-    restart: always
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: root
-      
+      POSTGRES_USER: atelia
+      POSTGRES_PASSWORD: atelia_password
       POSTGRES_DB: atelia
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U atelia -d atelia"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres_data:
