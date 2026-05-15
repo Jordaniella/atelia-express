@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Sparkles, Download } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { generatedVisualsApi, projectsApi, slugify } from '../../lib/api';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
@@ -53,30 +53,33 @@ export function VisualStudio() {
   const loadData = async () => {
     if (!projectId) return;
 
-    const [projectResult, productsResult, visualsResult] = await Promise.all([
-      supabase.from('projects').select('name').eq('id', projectId).maybeSingle(),
-      supabase.from('products').select('id, name, slug').eq('project_id', projectId).eq('status', 'active'),
-      supabase.from('visual_generations').select('*').eq('project_id', projectId).order('created_at', { ascending: false }).limit(6),
-    ]);
+    const { project } = await projectsApi.get(projectId);
+    const activeProducts = project.products.filter((product) => product.status === 'ACTIVE');
+    setProject({ name: project.name });
+    setProducts(activeProducts.map((product) => ({ id: product.id, name: product.name, slug: slugify(product.name) })));
+    if (activeProducts.length > 0 && selectedProduct === 'global') {
+      setSelectedProduct(activeProducts[0].id);
+    }
 
-    if (projectResult.data) setProject(projectResult.data);
-    if (productsResult.data) setProducts(productsResult.data);
-    if (visualsResult.data) setSavedVisuals(visualsResult.data);
+    const visuals = (await Promise.all(
+      activeProducts.map(async (product) => {
+        const { generatedVisuals } = await generatedVisualsApi.list(product.id);
+        return generatedVisuals.map((visual) => ({
+          id: visual.id,
+          prompt: visual.promptUsed,
+          image_url: visual.imageUrl,
+          style: visual.style,
+          created_at: visual.createdAt,
+        }));
+      }),
+    )).flat();
+    setSavedVisuals(visuals.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 6));
   };
 
   const loadSavedVisuals = async () => {
     if (!projectId) return;
 
-    const { data } = await supabase
-      .from('visual_generations')
-      .select('*')
-      .eq('project_id', projectId)
-      .order('created_at', { ascending: false })
-      .limit(6);
-
-    if (data) {
-      setSavedVisuals(data);
-    }
+    await loadData();
   };
 
   const handleGenerate = async () => {
@@ -106,34 +109,22 @@ export function VisualStudio() {
   const handleSave = async () => {
     if (!projectId || !generatedImage) return;
 
-    const productSlug = selectedProduct !== 'global'
-      ? products.find(p => p.id === selectedProduct)?.slug
-      : null;
+    if (selectedProduct === 'global') {
+      showToast('Please add and select a product before saving a visual.', 'error');
+      return;
+    }
 
-    const projectSlug = project?.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'project';
-
-    const storagePath = productSlug
-      ? `${projectSlug}/Products/${productSlug}`
-      : `${projectSlug}/Global`;
-
-    const { error } = await supabase
-      .from('visual_generations')
-      .insert({
-        project_id: projectId,
-        product_id: selectedProduct === 'global' ? null : selectedProduct,
-        prompt: generatedPrompt,
-        image_url: generatedImage,
-        style,
-        ratio,
-        storage_path: storagePath,
-        title: description || 'Untitled visual',
+    try {
+      await generatedVisualsApi.create({
+        productId: selectedProduct,
+        promptUsed: generatedPrompt,
+        imageUrl: generatedImage,
+        style: `${style} (${ratio})`,
       });
-
-    if (error) {
-      showToast('Failed to save visual. Please try again.', 'error');
-    } else {
       loadSavedVisuals();
       showToast('Visual saved successfully!', 'success');
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Failed to save visual. Please try again.', 'error');
     }
   };
 

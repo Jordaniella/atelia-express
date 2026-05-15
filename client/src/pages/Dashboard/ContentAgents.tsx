@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Sparkles, Copy, RefreshCw, Library, Send, Link as LinkIcon } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { GeneratedContentType, generatedContentsApi, Product, projectsApi } from '../../lib/api';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
@@ -31,11 +31,6 @@ interface ProjectContext {
   core_promise: string | null;
 }
 
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-}
 
 export function ContentAgents() {
   const { projectId } = useParams();
@@ -63,45 +58,52 @@ export function ContentAgents() {
   const loadProjectContext = async () => {
     if (!projectId) return;
 
-    const { data } = await supabase
-      .from('projects')
-      .select('name, description, target_audience, brand_tone, positioning_statement, core_promise')
-      .eq('id', projectId)
-      .maybeSingle();
-
-    if (data) {
-      setProjectContext(data);
-      setTone(data.brand_tone || 'professional');
+    const { project } = await projectsApi.get(projectId);
+    setProjectContext({
+      name: project.name,
+      description: project.description || '',
+      target_audience: project.brief?.targetAudience || '',
+      brand_tone: project.brief?.brandTone || null,
+      positioning_statement: project.brief?.marketContext || null,
+      core_promise: project.brief?.keyMessage || null,
+    });
+    setTone(project.brief?.brandTone || 'professional');
+    const activeProducts = project.products.filter((product) => product.status === 'ACTIVE');
+    setProducts(activeProducts);
+    if (activeProducts.length > 0 && selectedProduct === 'global') {
+      setSelectedProduct(activeProducts[0].id);
     }
   };
 
   const loadProducts = async () => {
     if (!projectId) return;
 
-    const { data } = await supabase
-      .from('products')
-      .select('id, name, description')
-      .eq('project_id', projectId)
-      .eq('status', 'active');
-
-    if (data) {
-      setProducts(data);
+    const { project } = await projectsApi.get(projectId);
+    const activeProducts = project.products.filter((product) => product.status === 'ACTIVE');
+    setProducts(activeProducts);
+    if (activeProducts.length > 0 && selectedProduct === 'global') {
+      setSelectedProduct(activeProducts[0].id);
     }
   };
 
   const loadSavedAssets = async () => {
     if (!projectId) return;
 
-    const { data } = await supabase
-      .from('content_assets')
-      .select('*')
-      .eq('project_id', projectId)
-      .order('created_at', { ascending: false })
-      .limit(5);
+    const { project } = await projectsApi.get(projectId);
+    const productIds = project.products.map((product) => product.id);
+    const assets = (await Promise.all(
+      productIds.map(async (productId) => {
+        const { generatedContents } = await generatedContentsApi.list(productId);
+        return generatedContents.map((asset) => ({
+          id: asset.id,
+          type: asset.type,
+          content: asset.content,
+          created_at: asset.createdAt,
+        }));
+      }),
+    )).flat();
 
-    if (data) {
-      setSavedAssets(data);
-    }
+    setSavedAssets(assets.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 5));
   };
 
   const handleGenerate = async () => {
@@ -140,32 +142,30 @@ export function ContentAgents() {
   const handleSave = async () => {
     if (!projectId || !generatedContent) return;
 
-    const channelMap: { [key: string]: string } = {
-      email: 'email',
-      post: 'instagram',
-      script: 'youtube',
-      landing_copy: 'landing',
+    if (selectedProduct === 'global') {
+      showToast('Please add and select a product before saving generated content.', 'error');
+      return;
+    }
+
+    const typeMap: Record<string, GeneratedContentType> = {
+      email: 'EMAIL',
+      post: 'SOCIAL_POST',
+      script: 'OFFER',
+      landing_copy: 'LANDING_PAGE',
     };
 
-    const { error } = await supabase
-      .from('content_assets')
-      .insert({
-        project_id: projectId,
-        product_id: selectedProduct === 'global' ? null : selectedProduct,
-        type: contentType,
+    try {
+      await generatedContentsApi.create({
+        productId: selectedProduct,
+        type: typeMap[contentType] || 'OFFER',
         content: generatedContent,
-        angle: angle || null,
-        tone: tone || null,
-        channel: channelMap[contentType] || null,
-        status: 'draft',
+        promptUsed: `angle=${angle || 'default'}; tone=${tone}`,
         title: `${contentType} - ${angle || 'Content'}`,
       });
-
-    if (error) {
-      showToast('Failed to save content. Please try again.', 'error');
-    } else {
       loadSavedAssets();
       showToast('Content saved successfully!', 'success');
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Failed to save content. Please try again.', 'error');
     }
   };
 

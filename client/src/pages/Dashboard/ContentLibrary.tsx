@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Search, Filter, Download, Trash2, Calendar as CalendarIcon, Eye, Save, X } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { generatedContentsApi, projectsApi } from '../../lib/api';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
@@ -55,23 +55,34 @@ export function ContentLibrary() {
     if (!projectId) return;
 
     setLoading(true);
-    const { data, error } = await supabase
-      .from('content_assets')
-      .select(`
-        *,
-        products (
-          name
-        )
-      `)
-      .eq('project_id', projectId)
-      .order('created_at', { ascending: false });
-
-    if (error) {
+    try {
+      const { project } = await projectsApi.get(projectId);
+      const loadedAssets = (await Promise.all(
+        project.products.map(async (product) => {
+          const { generatedContents } = await generatedContentsApi.list(product.id);
+          return generatedContents.map((asset) => ({
+            id: asset.id,
+            type: asset.type,
+            content: asset.content,
+            title: asset.title,
+            channel: asset.type === 'EMAIL' ? 'email' : asset.type === 'SOCIAL_POST' ? 'instagram' : asset.type === 'LANDING_PAGE' ? 'landing' : 'offer',
+            status: 'draft',
+            publish_at: null,
+            created_at: asset.createdAt,
+            updated_at: asset.updatedAt,
+            angle: asset.promptUsed,
+            tone: null,
+            product_id: asset.productId,
+            products: { name: product.name },
+          }));
+        }),
+      )).flat();
+      setAssets(loadedAssets.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
+    } catch {
       showToast('Failed to load content assets', 'error');
-    } else if (data) {
-      setAssets(data);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const filterAssets = () => {
@@ -104,18 +115,9 @@ export function ContentLibrary() {
   const handleDelete = async () => {
     if (!assetToDelete) return;
 
-    const { error } = await supabase.from('content_assets').delete().eq('id', assetToDelete);
-
-    if (error) {
-      showToast('Failed to delete content', 'error');
-    } else {
-      showToast('Content deleted successfully', 'success');
-      loadAssets();
-      if (selectedAsset?.id === assetToDelete) {
-        setSelectedAsset(null);
-      }
-    }
+    showToast('Deleting generated content is not available in the current backend MVP.', 'error');
     setAssetToDelete(null);
+    setDeleteModalOpen(false);
   };
 
   const openDeleteModal = (id: string) => {
@@ -145,22 +147,9 @@ export function ContentLibrary() {
   const handleSaveEdit = async () => {
     if (!selectedAsset) return;
 
-    const { error } = await supabase
-      .from('content_assets')
-      .update({
-        content: editedContent,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', selectedAsset.id);
-
-    if (error) {
-      showToast('Failed to update content', 'error');
-    } else {
-      showToast('Content updated successfully', 'success');
-      setIsEditing(false);
-      loadAssets();
-      setSelectedAsset({ ...selectedAsset, content: editedContent });
-    }
+    showToast('Editing generated content is not available in the current backend MVP.', 'error');
+    setIsEditing(false);
+    setSelectedAsset({ ...selectedAsset, content: editedContent });
   };
 
   const handleCancelEdit = () => {
@@ -170,10 +159,10 @@ export function ContentLibrary() {
 
   const getTypeIcon = (type: string) => {
     const icons: { [key: string]: string } = {
-      email: '📧',
-      post: '📱',
-      script: '🎬',
-      landing_copy: '🌐',
+      EMAIL: '📧',
+      SOCIAL_POST: '📱',
+      OFFER: '🎁',
+      LANDING_PAGE: '🌐',
     };
     return icons[type] || '📄';
   };
@@ -235,10 +224,10 @@ export function ContentLibrary() {
                     className="w-full px-3 py-2 rounded-lg bg-[var(--color-gray-dark)] border border-[var(--color-gray-medium)] text-white text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-ai-purple)]"
                   >
                     <option value="all">All Types</option>
-                    <option value="email">Email</option>
-                    <option value="post">Social Post</option>
-                    <option value="script">Video Script</option>
-                    <option value="landing_copy">Landing Copy</option>
+                    <option value="EMAIL">Email</option>
+                    <option value="SOCIAL_POST">Social Post</option>
+                    <option value="OFFER">Offer</option>
+                    <option value="LANDING_PAGE">Landing Page</option>
                   </select>
                 </div>
 

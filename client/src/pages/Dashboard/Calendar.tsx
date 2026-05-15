@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Calendar as CalendarIcon, Plus, CheckCircle, Clock, Trash2, Edit } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { projectsApi } from '../../lib/api';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
@@ -66,118 +66,29 @@ export function Calendar() {
   const loadData = async () => {
     if (!projectId) return;
 
-    const [projectResult, milestonesResult, contentResult] = await Promise.all([
-      supabase.from('projects').select('id, name').eq('id', projectId).maybeSingle(),
-      supabase.from('project_milestones').select('*').eq('project_id', projectId),
-      supabase.from('content_assets').select('id, title, type, channel, publish_at, status').eq('project_id', projectId).not('publish_at', 'is', null),
-    ]);
-
-    if (projectResult.data) setProject(projectResult.data);
-
-    const allEvents: CalendarEvent[] = [];
-
-    if (milestonesResult.data) {
-      milestonesResult.data.forEach((m: Milestone) => {
-        allEvents.push({
-          id: m.id,
-          type: 'milestone',
-          title: m.title,
-          date: m.due_at,
-          status: m.status,
-          priority: m.priority,
-        });
-      });
+    try {
+      const { project } = await projectsApi.get(projectId);
+      setProject({ id: project.id, name: project.name });
+      setEvents([]);
+    } catch {
+      showToast('Failed to load calendar data. Please try again.', 'error');
+    } finally {
+      setLoading(false);
     }
-
-    if (contentResult.data) {
-      contentResult.data.forEach((c: ContentEvent) => {
-        allEvents.push({
-          id: c.id,
-          type: 'content',
-          title: c.title || `${c.type} content`,
-          date: c.publish_at!,
-          status: c.status,
-          contentType: c.type,
-          channel: c.channel || undefined,
-        });
-      });
-    }
-
-    allEvents.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    setEvents(allEvents);
-    setLoading(false);
   };
 
   const handleMilestoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!projectId) return;
-
-    const data = {
-      project_id: projectId,
-      title: milestoneForm.title,
-      description: milestoneForm.description || null,
-      due_at: new Date(milestoneForm.due_at).toISOString(),
-      priority: milestoneForm.priority,
-    };
-
-    if (editingMilestoneId) {
-      const { error } = await supabase
-        .from('project_milestones')
-        .update(data)
-        .eq('id', editingMilestoneId);
-
-      if (error) {
-        showToast('Failed to update milestone. Please try again.', 'error');
-      } else {
-        showToast('Milestone updated successfully!', 'success');
-        resetMilestoneForm();
-        loadData();
-      }
-    } else {
-      const { error } = await supabase
-        .from('project_milestones')
-        .insert(data);
-
-      if (error) {
-        showToast('Failed to create milestone. Please try again.', 'error');
-      } else {
-        showToast('Milestone created successfully!', 'success');
-        resetMilestoneForm();
-        loadData();
-      }
-    }
+    showToast('Milestones are not available in the current backend MVP yet.', 'error');
+    resetMilestoneForm();
   };
 
-  const handleToggleMilestoneStatus = async (id: string, currentStatus: string) => {
-    const newStatus = currentStatus === 'done' ? 'todo' : 'done';
-
-    const { error } = await supabase
-      .from('project_milestones')
-      .update({ status: newStatus })
-      .eq('id', id);
-
-    if (error) {
-      showToast('Failed to update status. Please try again.', 'error');
-    } else {
-      showToast('Status updated!', 'success');
-      loadData();
-    }
+  const handleToggleMilestoneStatus = async (_id: string, _currentStatus: string) => {
+    showToast('Milestones are not available in the current backend MVP yet.', 'error');
   };
 
-  const handleDeleteMilestone = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this milestone?')) return;
-
-    const { error } = await supabase
-      .from('project_milestones')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      showToast('Failed to delete milestone. Please try again.', 'error');
-    } else {
-      showToast('Milestone deleted!', 'success');
-      loadData();
-    }
+  const handleDeleteMilestone = async (_id: string) => {
+    showToast('Milestones are not available in the current backend MVP yet.', 'error');
   };
 
   const resetMilestoneForm = () => {

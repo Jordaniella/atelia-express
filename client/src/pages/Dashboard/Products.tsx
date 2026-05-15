@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Plus, Edit, Trash2, Package } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { Product, ProductStatus, productsApi, projectsApi, toProductStatus } from '../../lib/api';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
@@ -9,19 +9,7 @@ import { Textarea } from '../../components/ui/Textarea';
 import { DashboardLayout } from '../../components/layout/DashboardLayout';
 import { useToast } from '../../contexts/ToastContext';
 
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  slug: string;
-  price: string | null;
-  target_segment: string | null;
-  unique_value_proposition: string | null;
-  status: string;
-  created_at: string;
-}
-
-interface Project {
+interface ProjectSummary {
   id: string;
   name: string;
 }
@@ -29,7 +17,7 @@ interface Project {
 export function Products() {
   const { projectId } = useParams();
   const { showToast } = useToast();
-  const [project, setProject] = useState<Project | null>(null);
+  const [project, setProject] = useState<ProjectSummary | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -38,78 +26,71 @@ export function Products() {
     name: '',
     description: '',
     price: '',
-    target_segment: '',
-    unique_value_proposition: '',
-    status: 'active',
+    targetSegment: '',
+    uniqueValueProposition: '',
+    status: 'ACTIVE' as ProductStatus,
   });
 
   useEffect(() => {
-    loadData();
+    void loadData();
   }, [projectId]);
 
   const loadData = async () => {
     if (!projectId) return;
 
-    const [projectResult, productsResult] = await Promise.all([
-      supabase.from('projects').select('id, name').eq('id', projectId).maybeSingle(),
-      supabase.from('products').select('*').eq('project_id', projectId).order('created_at', { ascending: false }),
-    ]);
-
-    if (projectResult.data) setProject(projectResult.data);
-    if (productsResult.data) setProducts(productsResult.data);
-
-    setLoading(false);
+    try {
+      const { project } = await projectsApi.get(projectId);
+      setProject({ id: project.id, name: project.name });
+      setProducts(project.products || []);
+    } catch {
+      showToast('Failed to load products. Please try again.', 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!projectId) return;
 
-    const productData = {
-      project_id: projectId,
-      name: formData.name,
-      description: formData.description,
-      price: formData.price || null,
-      target_segment: formData.target_segment || null,
-      unique_value_proposition: formData.unique_value_proposition || null,
-      status: formData.status,
-    };
-
-    if (editingId) {
-      const { error } = await supabase
-        .from('products')
-        .update(productData)
-        .eq('id', editingId);
-
-      if (error) {
-        showToast('Failed to update product. Please try again.', 'error');
-      } else {
+    try {
+      if (editingId) {
+        await productsApi.update(editingId, {
+          name: formData.name,
+          description: formData.description || null,
+          price: formData.price || null,
+          targetSegment: formData.targetSegment || null,
+          uniqueValueProposition: formData.uniqueValueProposition || null,
+          status: formData.status,
+        });
         showToast('Product updated successfully!', 'success');
-        resetForm();
-        loadData();
-      }
-    } else {
-      const { error } = await supabase
-        .from('products')
-        .insert(productData);
-
-      if (error) {
-        showToast('Failed to create product. Please try again.', 'error');
       } else {
+        await productsApi.create({
+          projectId,
+          name: formData.name,
+          description: formData.description || undefined,
+          price: formData.price || undefined,
+          targetSegment: formData.targetSegment || undefined,
+          uniqueValueProposition: formData.uniqueValueProposition || undefined,
+          status: formData.status,
+        });
         showToast('Product created successfully!', 'success');
-        resetForm();
-        loadData();
       }
+
+      resetForm();
+      await loadData();
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Failed to save product. Please try again.', 'error');
     }
   };
 
   const handleEdit = (product: Product) => {
     setFormData({
       name: product.name,
-      description: product.description,
+      description: product.description || '',
       price: product.price || '',
-      target_segment: product.target_segment || '',
-      unique_value_proposition: product.unique_value_proposition || '',
+      targetSegment: product.targetSegment || '',
+      uniqueValueProposition: product.uniqueValueProposition || '',
       status: product.status,
     });
     setEditingId(product.id);
@@ -117,20 +98,16 @@ export function Products() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this product? All associated content and visuals will be unlinked.')) {
+    if (!confirm('Are you sure you want to delete this product? Generated content and visuals linked to it will also be deleted.')) {
       return;
     }
 
-    const { error } = await supabase
-      .from('products')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      showToast('Failed to delete product. Please try again.', 'error');
-    } else {
+    try {
+      await productsApi.delete(id);
       showToast('Product deleted successfully!', 'success');
-      loadData();
+      await loadData();
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Failed to delete product. Please try again.', 'error');
     }
   };
 
@@ -139,9 +116,9 @@ export function Products() {
       name: '',
       description: '',
       price: '',
-      target_segment: '',
-      unique_value_proposition: '',
-      status: 'active',
+      targetSegment: '',
+      uniqueValueProposition: '',
+      status: 'ACTIVE',
     });
     setEditingId(null);
     setShowForm(false);
@@ -197,134 +174,114 @@ export function Products() {
                 />
                 <Textarea
                   label="Description"
-                  placeholder="What does this product offer?"
-                  rows={3}
+                  placeholder="Describe this product or offer..."
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  required
+                  rows={3}
                 />
-                <Input
-                  label="Price"
-                  placeholder="e.g., $99/month or Free"
-                  value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                />
+                <div className="grid md:grid-cols-2 gap-4">
+                  <Input
+                    label="Price"
+                    placeholder="e.g., $99, Free trial"
+                    value={formData.price}
+                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                  />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Status</label>
+                    <select
+                      value={formData.status}
+                      onChange={(e) => setFormData({ ...formData, status: toProductStatus(e.target.value) })}
+                      className="w-full px-4 py-3 rounded-lg bg-[var(--color-gray-dark)] border border-[var(--color-gray-medium)] text-white focus:outline-none focus:ring-2 focus:ring-[var(--color-ai-purple)]"
+                    >
+                      <option value="ACTIVE">Active</option>
+                      <option value="DRAFT">Draft</option>
+                      <option value="ARCHIVED">Archived</option>
+                    </select>
+                  </div>
+                </div>
                 <Textarea
                   label="Target Segment"
-                  placeholder="Who is this product specifically for?"
+                  placeholder="Specific audience segment for this product..."
+                  value={formData.targetSegment}
+                  onChange={(e) => setFormData({ ...formData, targetSegment: e.target.value })}
                   rows={2}
-                  value={formData.target_segment}
-                  onChange={(e) => setFormData({ ...formData, target_segment: e.target.value })}
                 />
                 <Textarea
                   label="Unique Value Proposition"
                   placeholder="What makes this product unique?"
+                  value={formData.uniqueValueProposition}
+                  onChange={(e) => setFormData({ ...formData, uniqueValueProposition: e.target.value })}
                   rows={2}
-                  value={formData.unique_value_proposition}
-                  onChange={(e) => setFormData({ ...formData, unique_value_proposition: e.target.value })}
                 />
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Status
-                  </label>
-                  <select
-                    value={formData.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                    className="w-full px-4 py-3 rounded-xl bg-[var(--color-gray-dark)] border border-[var(--color-gray-medium)] text-white focus:outline-none focus:ring-2 focus:ring-[var(--color-ai-purple)]"
-                  >
-                    <option value="active">Active</option>
-                    <option value="draft">Draft</option>
-                    <option value="archived">Archived</option>
-                  </select>
-                </div>
                 <div className="flex gap-3">
-                  <Button type="submit">
-                    {editingId ? 'Update Product' : 'Create Product'}
-                  </Button>
-                  <Button type="button" variant="ghost" onClick={resetForm}>
-                    Cancel
-                  </Button>
+                  <Button type="submit">{editingId ? 'Update Product' : 'Create Product'}</Button>
+                  <Button type="button" variant="ghost" onClick={resetForm}>Cancel</Button>
                 </div>
               </form>
             </Card>
           )}
 
-          <div className="grid md:grid-cols-2 gap-6">
-            {products.length === 0 ? (
-              <Card className="md:col-span-2">
-                <div className="text-center py-12">
-                  <Package className="w-16 h-16 mx-auto mb-4 text-gray-600" />
-                  <h3 className="text-xl font-semibold mb-2">No products yet</h3>
-                  <p className="text-gray-400 mb-6">
-                    Create your first product to organize content and visuals
-                  </p>
-                  <Button onClick={() => setShowForm(true)}>
-                    <Plus className="w-5 h-5" />
-                    Add Product
-                  </Button>
-                </div>
-              </Card>
-            ) : (
-              products.map((product) => (
+          {products.length === 0 ? (
+            <Card>
+              <div className="text-center py-12">
+                <Package className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold mb-2">No products yet</h3>
+                <p className="text-gray-400 mb-6">Add your first product or offer to organize generated assets.</p>
+                <Button onClick={() => setShowForm(true)}>
+                  <Plus className="w-5 h-5" />
+                  Add Product
+                </Button>
+              </div>
+            </Card>
+          ) : (
+            <div className="grid md:grid-cols-2 gap-6">
+              {products.map((product) => (
                 <Card key={product.id} hover>
                   <div className="space-y-4">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <h3 className="text-xl font-semibold mb-2">{product.name}</h3>
-                        {product.price && (
-                          <p className="text-[var(--color-cyan-accent)] font-medium mb-2">
-                            {product.price}
-                          </p>
-                        )}
-                        <p className="text-gray-400 text-sm">{product.description}</p>
+                        <div className="flex items-center gap-2 mb-2">
+                          <h3 className="text-xl font-semibold">{product.name}</h3>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            product.status === 'ACTIVE'
+                              ? 'bg-green-500/20 text-green-300'
+                              : product.status === 'DRAFT'
+                                ? 'bg-yellow-500/20 text-yellow-300'
+                                : 'bg-gray-500/20 text-gray-300'
+                          }`}>
+                            {product.status.toLowerCase()}
+                          </span>
+                        </div>
+                        {product.description && <p className="text-gray-400 text-sm mb-3">{product.description}</p>}
+                        {product.price && <p className="text-[var(--color-cyan-accent)] font-medium">{product.price}</p>}
                       </div>
                       <div className="flex gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEdit(product)}
-                        >
+                        <Button variant="ghost" size="sm" onClick={() => handleEdit(product)}>
                           <Edit className="w-4 h-4" />
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDelete(product.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
+                        <Button variant="ghost" size="sm" onClick={() => void handleDelete(product.id)}>
+                          <Trash2 className="w-4 h-4 text-red-400" />
                         </Button>
                       </div>
                     </div>
-                    {product.unique_value_proposition && (
-                      <div>
-                        <p className="text-xs text-gray-500 mb-1">Unique Value</p>
-                        <p className="text-sm">{product.unique_value_proposition}</p>
-                      </div>
-                    )}
-                    {product.target_segment && (
+
+                    {product.targetSegment && (
                       <div>
                         <p className="text-xs text-gray-500 mb-1">Target Segment</p>
-                        <p className="text-sm">{product.target_segment}</p>
+                        <p className="text-sm text-gray-300">{product.targetSegment}</p>
                       </div>
                     )}
-                    <div>
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          product.status === 'active'
-                            ? 'bg-green-500/10 text-green-500'
-                            : product.status === 'draft'
-                            ? 'bg-yellow-500/10 text-yellow-500'
-                            : 'bg-gray-500/10 text-gray-500'
-                        }`}
-                      >
-                        {product.status}
-                      </span>
-                    </div>
+                    {product.uniqueValueProposition && (
+                      <div>
+                        <p className="text-xs text-gray-500 mb-1">Value Proposition</p>
+                        <p className="text-sm text-gray-300">{product.uniqueValueProposition}</p>
+                      </div>
+                    )}
                   </div>
                 </Card>
-              ))
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </DashboardLayout>

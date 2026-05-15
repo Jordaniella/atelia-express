@@ -1,0 +1,126 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ProjectStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum GeneratedContentType {
+  LANDING_PAGE
+  EMAIL
+  SOCIAL_POST
+  OFFER
+}
+
+model User {
+  id           String    @id @default(uuid()) @db.Uuid
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  name         String?
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  projects     Project[]
+
+  @@map("users")
+}
+
+model Project {
+  id          String        @id @default(uuid()) @db.Uuid
+  userId      String        @map("user_id") @db.Uuid
+  name        String
+  description String?
+  status      ProjectStatus @default(DRAFT)
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  brief       Brief?
+  products    Product[]
+
+  @@index([userId])
+  @@map("projects")
+}
+
+model Brief {
+  id                   String   @id @default(uuid()) @db.Uuid
+  projectId            String   @unique @map("project_id") @db.Uuid
+  targetAudience       String   @map("target_audience")
+  brandTone            String?  @map("brand_tone")
+  marketContext        String?  @map("market_context")
+  launchGoal           String?  @map("launch_goal")
+  keyMessage           String?  @map("key_message")
+  offerDescription     String?  @map("offer_description")
+  competitors          String?
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  project              Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("briefs")
+}
+
+model Product {
+  id                     String              @id @default(uuid()) @db.Uuid
+  projectId              String              @map("project_id") @db.Uuid
+  name                   String
+  description            String?
+  price                  String?
+  targetSegment          String?             @map("target_segment")
+  uniqueValueProposition String?             @map("unique_value_proposition")
+  status                 ProductStatus       @default(ACTIVE)
+  createdAt              DateTime            @default(now()) @map("created_at")
+  updatedAt              DateTime            @updatedAt @map("updated_at")
+
+  project                Project             @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  generatedContents      GeneratedContent[]
+  generatedVisuals       GeneratedVisual[]
+
+  @@index([projectId])
+  @@map("products")
+}
+
+model GeneratedContent {
+  id          String               @id @default(uuid()) @db.Uuid
+  productId   String               @map("product_id") @db.Uuid
+  type        GeneratedContentType
+  title       String?
+  content     String
+  promptUsed  String?              @map("prompt_used")
+  createdAt   DateTime             @default(now()) @map("created_at")
+  updatedAt   DateTime             @updatedAt @map("updated_at")
+
+  product     Product              @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([type])
+  @@map("generated_contents")
+}
+
+model GeneratedVisual {
+  id          String   @id @default(uuid()) @db.Uuid
+  productId   String   @map("product_id") @db.Uuid
+  imageUrl    String   @map("image_url")
+  style       String
+  promptUsed  String   @map("prompt_used")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@map("generated_visuals")
+}

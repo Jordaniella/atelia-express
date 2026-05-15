@@ -1,20 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, Calendar, Clock, AlertCircle, Sparkles, User } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { Project, projectsApi } from '../../lib/api';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { DashboardLayout } from '../../components/layout/DashboardLayout';
 import { useSubscription } from '../../contexts/SubscriptionContext';
-
-interface Project {
-  id: string;
-  name: string;
-  description: string;
-  status: string;
-  created_at: string;
-}
 
 export function ProjectsList() {
   const { user } = useAuth();
@@ -24,38 +16,19 @@ export function ProjectsList() {
   const [userName, setUserName] = useState('');
 
   useEffect(() => {
-    loadUserProfile();
+    setUserName(user?.name || user?.email || '');
     loadProjects();
   }, [user]);
-
-  const loadUserProfile = async () => {
-    if (!user) return;
-
-    const { data } = await supabase
-      .from('user_profiles')
-      .select('name')
-      .eq('id', user.id)
-      .maybeSingle();
-
-    if (data) {
-      setUserName(data.name);
-    }
-  };
 
   const loadProjects = async () => {
     if (!user) return;
 
-    const { data, error } = await supabase
-      .from('projects')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
-
-    if (!error && data) {
-      setProjects(data);
+    try {
+      const { projects } = await projectsApi.list();
+      setProjects(projects);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   const formatDate = (dateString: string) => {
@@ -157,18 +130,18 @@ export function ProjectsList() {
                       <div className="space-y-4">
                         <div className="flex items-start justify-between">
                           <h3 className="text-xl font-semibold">{project.name}</h3>
-                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusColors[project.status as keyof typeof statusColors] || statusColors.draft}`}>
+                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusColors[project.status.toLowerCase() as keyof typeof statusColors] || statusColors.draft}`}>
                             {project.status}
                           </span>
                         </div>
 
                         <p className=" text-sm line-clamp-2 text-[var(--text-muted)]">
-                          {project.description}
+                          {project.description || ''}
                         </p>
 
                         <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
                           <Calendar className="w-4 h-4" />
-                          <span>{formatDate(project.created_at)}</span>
+                          <span>{formatDate(project.createdAt)}</span>
                         </div>
                       </div>
                     </Card>

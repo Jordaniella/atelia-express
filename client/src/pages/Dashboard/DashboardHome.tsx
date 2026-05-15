@@ -1,23 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { FileText, Image, Workflow, TrendingUp, ArrowLeft, Library, Sparkles, Zap, Target, Lightbulb, Gift } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { Project as ApiProject, projectsApi } from '../../lib/api';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { DashboardLayout } from '../../components/layout/DashboardLayout';
 
-interface Project {
-  id: string;
-  name: string;
-  description: string;
-  status: string;
-  created_at: string;
-  positioning_statement: string | null;
-  core_promise: string | null;
-  unique_mechanism: string | null;
-  key_offer: string | null;
-}
+type Project = ApiProject;
 
 interface ReadinessScore {
   content: { current: number; target: number };
@@ -43,73 +33,45 @@ export function DashboardHome() {
 
   useEffect(() => {
     loadProject();
-    loadStats();
-    loadReadiness();
   }, [user, projectId]);
 
   const loadProject = async () => {
     if (!projectId) return;
 
-    const { data, error } = await supabase
-      .from('projects')
-      .select('*')
-      .eq('id', projectId)
-      .maybeSingle();
-
-    if (!error && data) {
-      setProject(data);
+    try {
+      const { project } = await projectsApi.get(projectId);
+      setProject(project);
+      updateStats(project);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   const loadReadiness = async () => {
-    if (!projectId) return;
-
-    const { count: contentCount } = await supabase
-      .from('content_assets')
-      .select('*', { count: 'exact', head: true })
-      .eq('project_id', projectId);
-
-    const { count: visualCount } = await supabase
-      .from('visual_generations')
-      .select('*', { count: 'exact', head: true })
-      .eq('project_id', projectId);
-
-    const { count: automationCount } = await supabase
-      .from('automations')
-      .select('*', { count: 'exact', head: true })
-      .eq('project_id', projectId);
-
-    setReadiness({
-      content: { current: contentCount || 0, target: 5 },
-      visuals: { current: visualCount || 0, target: 4 },
-      automation: { current: automationCount || 0, target: 1 },
-    });
+    if (!project) return;
+    updateStats(project);
   };
 
   const loadStats = async () => {
     if (!projectId) return;
+    const { project } = await projectsApi.get(projectId);
+    updateStats(project);
+  };
 
-    const { count: contentCount } = await supabase
-      .from('content_assets')
-      .select('*', { count: 'exact', head: true })
-      .eq('project_id', projectId);
+  const updateStats = (project: ApiProject) => {
+    const contentCount = project.products.reduce((total, product) => total + (product._count?.generatedContents || product.generatedContents?.length || 0), 0);
+    const visualCount = project.products.reduce((total, product) => total + (product._count?.generatedVisuals || product.generatedVisuals?.length || 0), 0);
 
-    const { count: visualCount } = await supabase
-      .from('visual_generations')
-      .select('*', { count: 'exact', head: true })
-      .eq('project_id', projectId);
-
-    const { count: automationCount } = await supabase
-      .from('automations')
-      .select('*', { count: 'exact', head: true })
-      .eq('project_id', projectId);
+    setReadiness({
+      content: { current: contentCount, target: 5 },
+      visuals: { current: visualCount, target: 4 },
+      automation: { current: 0, target: 1 },
+    });
 
     setStats({
-      totalContent: contentCount || 0,
-      totalVisuals: visualCount || 0,
-      totalAutomations: automationCount || 0,
+      totalContent: contentCount,
+      totalVisuals: visualCount,
+      totalAutomations: 0,
     });
   };
 
@@ -156,7 +118,7 @@ export function DashboardHome() {
               </Button>
             </Link>
             <h1 className="text-4xl mb-2">{project.name}</h1>
-            <p className="text-gray-300">{project.description}</p>
+            <p className="text-gray-300">{project.description || 'No description yet'}</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
@@ -246,28 +208,28 @@ export function DashboardHome() {
                     <Target className="w-5 h-5 text-[var(--text-primary)] mt-1 flex-shrink-0" />
                     <div>
                       <p className="text-sm text-[var(--text-primary)] mb-1">Positioning</p>
-                      <p className="text-sm text-[var(--text-muted)]">{project.positioning_statement || 'Not defined yet'}</p>
+                      <p className="text-sm text-[var(--text-muted)]">{project.brief?.marketContext || 'Not defined yet'}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <Lightbulb className="w-5 h-5 text-[var(--color-cyan-accent)] mt-1 flex-shrink-0" />
                     <div>
                       <p className="text-sm text-[var(--text-primary)] mb-1">Core Promise</p>
-                      <p className="text-sm text-[var(--text-muted)]">{project.core_promise || 'Not defined yet'}</p>
+                      <p className="text-sm text-[var(--text-muted)]">{project.brief?.keyMessage || 'Not defined yet'}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <Zap className="w-5 h-5 text-[var(--brand-primary)] mt-1 flex-shrink-0" />
                     <div>
                       <p className="text-sm text-[var(--text-primary)] mb-1">Unique Mechanism</p>
-                      <p className="text-sm text-[var(--text-muted)]">{project.unique_mechanism || 'Not defined yet'}</p>
+                      <p className="text-sm text-[var(--text-muted)]">{project.brief?.launchGoal || 'Not defined yet'}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <Gift className="w-5 h-5 text-[var(--brand-primary)] mt-1 flex-shrink-0" />
                     <div>
                       <p className="text-sm text-[var(--brand-primary)] mb-1">Key Offer</p>
-                      <p className="text-sm text-[var(--text-muted)]">{project.key_offer || 'Not defined yet'}</p>
+                      <p className="text-sm text-[var(--text-muted)]">{project.brief?.offerDescription || 'Not defined yet'}</p>
                     </div>
                   </div>
                 </div>

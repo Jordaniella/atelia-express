@@ -1,4 +1,3 @@
-import { i } from "framer-motion/client";
 import { ButtonHTMLAttributes, ReactNode } from "react";
 import styled from "styled-components";
 
@@ -55,7 +54,7 @@ const ButtonBase = styled.button`
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
-  variant?: "primary" | "secondary" | "ghost" | "danger";
+  variant?: "primary" | "secondary" | "ghost" | "danger" | "outline";
   size?: "sm" | "md" | "lg";
   isLoading?: boolean;
 }
@@ -80,6 +79,7 @@ export const Button = ({
     secondary: "glass-effect hover:bg-white/10 text-white",
     ghost: "text-gray-300 hover:text-white hover:bg-white/5",
     danger: "bg-red-600 hover:bg-red-700 text-white",
+    outline: "border border-white/20 text-white hover:bg-white/10",
   };
 
   const sizes = {
@@ -90,7 +90,7 @@ export const Button = ({
 
   return (
     <ButtonBase
-      className={`${baseStyles} ${variants[variant]} ${className} ${variant}`}
+      className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className} ${variant}`}
       disabled={disabled || isLoading}
       {...props}
     >

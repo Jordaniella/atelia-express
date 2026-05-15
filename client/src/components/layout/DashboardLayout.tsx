@@ -2,7 +2,7 @@ import { ReactNode, useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation, useParams } from 'react-router-dom';
 import { Search, LayoutDashboard,FolderOpenIcon , Package, Calendar, FolderOpen, Settings, LogOut, User, ChevronDown, Library, CreditCard, Crown, FolderOpenDot } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { supabase } from '../../lib/supabase';
+import { projectsApi } from '../../lib/api';
 import { Button } from '../ui/Button';
 import { LanguageSelector } from '../LanguageSelector';
 import { useSubscription } from '../../contexts/SubscriptionContext';
@@ -35,15 +35,16 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const loadProducts = async () => {
     if (!projectId) return;
 
-    const { data } = await supabase
-      .from('products')
-      .select('id, name')
-      .eq('project_id', projectId)
-      .eq('status', 'active')
-      .order('name');
-
-    if (data) {
-      setProducts(data);
+    try {
+      const { project } = await projectsApi.get(projectId);
+      setProducts(
+        project.products
+          .filter((product) => product.status === 'ACTIVE')
+          .map((product) => ({ id: product.id, name: product.name }))
+          .sort((a, b) => a.name.localeCompare(b.name)),
+      );
+    } catch {
+      setProducts([]);
     }
   };
 
@@ -151,7 +152,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 <span className="text-xs font-medium text-gray-400">Current Plan</span>
               </div>
               <p className="text-sm font-semibold text-[var(--brand-primary)] capitalize">
-                {subscription?.plan || 'Free'}
+                {subscription?.plan || 'MVP'}
               </p>
             </div>
           </Link>

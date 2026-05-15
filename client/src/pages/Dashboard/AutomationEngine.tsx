@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Sparkles, Download, Mail, ShoppingCart, Users } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { DashboardLayout } from '../../components/layout/DashboardLayout';
@@ -32,15 +31,7 @@ export function AutomationEngine() {
   const loadSavedAutomations = async () => {
     if (!projectId) return;
 
-    const { data } = await supabase
-      .from('automations')
-      .select('*')
-      .eq('project_id', projectId)
-      .order('created_at', { ascending: false });
-
-    if (data) {
-      setSavedAutomations(data);
-    }
+    setSavedAutomations([]);
   };
 
   const templates = [
@@ -167,18 +158,7 @@ export function AutomationEngine() {
   const handleSave = async () => {
     if (!projectId || !generatedFlow) return;
 
-    const { error } = await supabase
-      .from('automations')
-      .insert({
-        project_id: projectId,
-        type: selectedTemplate,
-        config_json: generatedFlow,
-      });
-
-    if (!error) {
-      loadSavedAutomations();
-      alert('Automation saved successfully!');
-    }
+    showToast('Automation persistence is not available in the current backend MVP yet.', 'error');
   };
 
   const handleExport = () => {
