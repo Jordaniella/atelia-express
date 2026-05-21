@@ -1,7 +1,7 @@
 import { useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calendar, FolderOpen, PaletteIcon } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { projectsApi } from '../../lib/api';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
@@ -37,30 +37,25 @@ export function NewProject() {
       return;
     }
 
-    const { data, error: insertError } = await supabase
-      .from('projects')
-      .insert({
-        user_id: user.id,
+    try {
+      const { project } = await projectsApi.create({
         name: formData.name,
         description: formData.description,
-        target_audience: formData.targetAudience,
-        brand_tone: formData.brandTone,
-        launch_date: formData.launchDate || null,
-        status: 'draft',
-      })
-      .select()
-      .single();
+        status: 'DRAFT',
+        brief: {
+          targetAudience: formData.targetAudience,
+          brandTone: formData.brandTone || undefined,
+          launchGoal: formData.launchDate ? `Launch date: ${formData.launchDate}` : undefined,
+        },
+      });
 
-    if (insertError) {
-      setError(insertError.message);
-      showToast('Failed to create project. Please try again.', 'error');
-      setLoading(false);
-      return;
-    }
-
-    if (data) {
       showToast('Project created successfully!', 'success');
-      navigate(`/dashboard/project/${data.id}`);
+      navigate(`/dashboard/project/${project.id}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to create project. Please try again.';
+      setError(message);
+      showToast(message, 'error');
+      setLoading(false);
     }
   };
 

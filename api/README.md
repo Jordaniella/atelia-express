@@ -10,7 +10,7 @@ This backend intentionally replaces the previous Supabase-centered approach with
 - JWT authentication for private API routes.
 - bcrypt for password hashing.
 - Zod for payload validation.
-- Docker Compose for a local PostgreSQL database.
+- Native local PostgreSQL running on port `5432` (no Docker dependency).
 
 > The frontend is not part of this backend migration. Every business operation is exposed through Express routes and persisted through Prisma/PostgreSQL.
 
@@ -18,7 +18,6 @@ This backend intentionally replaces the previous Supabase-centered approach with
 
 ```txt
 api/
-├── docker-compose.yml              # Local PostgreSQL service
 ├── prisma.config.ts                # Prisma 7 config, including DATABASE_URL and migrations path
 ├── prisma/
 │   ├── schema.prisma               # Data model and SQL relations
@@ -54,39 +53,84 @@ The API is organized by business module instead of by technical layer only. Each
 
 The controller layer only translates HTTP requests/responses. The service layer owns business rules and database calls. Middlewares handle cross-cutting concerns such as authentication, validation and error formatting.
 
-## 2. Local setup
+## 2. Local setup with native PostgreSQL (no Docker)
+
+The API expects a PostgreSQL server installed directly on your machine and reachable on `localhost:5432`. Docker is intentionally not required for the database anymore.
 
 ### 2.1 Install dependencies
 
 ```bash
+cd api
 npm install
 ```
 
-### 2.2 Configure environment
+### 2.2 Install and start PostgreSQL locally
+
+Use the installation method that matches your operating system. Examples:
+
+#### macOS with Homebrew
 
 ```bash
-cp .env.example .env
+brew install postgresql@16
+brew services start postgresql@16
 ```
 
-For local development the default database URL is:
+#### Ubuntu / Debian
+
+```bash
+sudo apt update
+sudo apt install postgresql postgresql-contrib
+sudo systemctl enable postgresql
+sudo systemctl start postgresql
+```
+
+#### Windows
+
+Install PostgreSQL from the official installer, keep the default port `5432`, then ensure the PostgreSQL service is running from the Windows Services panel.
+
+### 2.3 Create the local database user and database
+
+The default `.env.example` uses this connection string:
 
 ```env
 DATABASE_URL="postgresql://atelia:atelia_password@localhost:5432/atelia?schema=public"
 ```
 
+Create the matching role and database with `psql`:
+
+```bash
+# Open psql as the PostgreSQL admin user.
+# macOS often works with: psql postgres
+# Linux often uses: sudo -u postgres psql
+psql postgres
+```
+
+Then run:
+
+```sql
+CREATE ROLE atelia WITH LOGIN PASSWORD 'atelia_password';
+CREATE DATABASE atelia OWNER atelia;
+GRANT ALL PRIVILEGES ON DATABASE atelia TO atelia;
+\q
+```
+
+Verify the connection:
+
+```bash
+psql "postgresql://atelia:atelia_password@localhost:5432/atelia" -c "SELECT current_database(), current_user;"
+```
+
+Expected result: database `atelia`, user `atelia`.
+
+### 2.4 Configure environment
+
+```bash
+cp .env.example .env
+```
+
+If you created a different local user, password, database or port, update `DATABASE_URL` in `.env` accordingly. Keep `?schema=public` at the end unless you intentionally use another PostgreSQL schema.
+
 Set a long random value for `JWT_SECRET` before production use.
-
-### 2.3 Start PostgreSQL
-
-```bash
-docker compose up -d
-```
-
-### 2.4 Run Prisma migrations
-
-```bash
-npm run db:migrate
-```
 
 ### 2.5 Generate Prisma Client
 
@@ -94,7 +138,23 @@ npm run db:migrate
 npm run db:generate
 ```
 
-### 2.6 Optional seed
+### 2.6 Run Prisma migrations on the native local database
+
+```bash
+npm run db:migrate
+```
+
+This command reads `DATABASE_URL` from `.env` via `prisma.config.ts`, connects to your local PostgreSQL instance and applies the migrations in `prisma/migrations`.
+
+If the command fails with a connection error, check that:
+
+- PostgreSQL is running locally.
+- Port `5432` is open.
+- User `atelia` exists.
+- Database `atelia` exists.
+- The password in `.env` matches the local PostgreSQL role password.
+
+### 2.7 Optional seed
 
 ```bash
 npm run db:seed
@@ -107,7 +167,7 @@ email: demo@atelia.ai
 password: Password123!
 ```
 
-### 2.7 Start the API
+### 2.8 Start the API
 
 ```bash
 npm run dev
@@ -117,6 +177,21 @@ The server starts on:
 
 ```txt
 http://localhost:4000/api/v1
+```
+
+### 2.9 Quick health check
+
+```bash
+curl http://localhost:4000/api/v1/health
+```
+
+Expected response:
+
+```json
+{
+  "status": "ok",
+  "service": "atelia-api"
+}
 ```
 
 ## 3. Prisma models and SQL relations

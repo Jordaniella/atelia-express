@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, FileText, Image, Workflow, Target, Lightbulb, Zap, Gift, Edit, Package, Calendar as CalendarIcon, FolderOpen, Library } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { Project as ApiProject, projectsApi, toProjectStatus } from '../../lib/api';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
@@ -12,7 +12,7 @@ import { useToast } from '../../contexts/ToastContext';
 interface Project {
   id: string;
   name: string;
-  description: string;
+  description: string | null;
   target_audience: string;
   brand_tone: string | null;
   launch_date: string | null;
@@ -23,6 +23,23 @@ interface Project {
   key_offer: string | null;
 }
 
+function toViewProject(project: ApiProject): Project {
+  return {
+    id: project.id,
+    name: project.name,
+    description: project.description,
+    target_audience: project.brief?.targetAudience || '',
+    brand_tone: project.brief?.brandTone || null,
+    launch_date: project.brief?.launchGoal?.startsWith('Launch date: ')
+      ? project.brief.launchGoal.replace('Launch date: ', '')
+      : null,
+    status: project.status,
+    positioning_statement: project.brief?.marketContext || null,
+    core_promise: project.brief?.keyMessage || null,
+    unique_mechanism: project.brief?.launchGoal || null,
+    key_offer: project.brief?.offerDescription || null,
+  };
+}
 export function ProjectDetail() {
   const { projectId } = useParams();
   const { showToast } = useToast();
@@ -52,13 +69,9 @@ export function ProjectDetail() {
   const loadProject = async () => {
     if (!projectId) return;
 
-    const { data, error } = await supabase
-      .from('projects')
-      .select('*')
-      .eq('id', projectId)
-      .maybeSingle();
-
-    if (!error && data) {
+    try {
+      const { project: apiProject } = await projectsApi.get(projectId);
+      const data = toViewProject(apiProject);
       setProject(data);
       setStrategyForm({
         positioning_statement: data.positioning_statement || '',
@@ -72,44 +85,52 @@ export function ProjectDetail() {
         target_audience: data.target_audience || '',
         brand_tone: data.brand_tone || '',
         launch_date: data.launch_date || '',
-        status: data.status || 'draft',
+        status: data.status || 'DRAFT',
       });
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   const handleSaveStrategy = async () => {
     if (!projectId) return;
 
-    const { error } = await supabase
-      .from('projects')
-      .update(strategyForm)
-      .eq('id', projectId);
-
-    if (error) {
-      showToast('Failed to save strategy. Please try again.', 'error');
-    } else {
+    try {
+      await projectsApi.update(projectId, {
+        brief: {
+          marketContext: strategyForm.positioning_statement,
+          keyMessage: strategyForm.core_promise,
+          launchGoal: strategyForm.unique_mechanism,
+          offerDescription: strategyForm.key_offer,
+        },
+      });
       showToast('Launch strategy saved successfully!', 'success');
       setEditingStrategy(false);
       loadProject();
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Failed to save strategy. Please try again.', 'error');
     }
   };
 
   const handleSaveDetails = async () => {
     if (!projectId) return;
 
-    const { error } = await supabase
-      .from('projects')
-      .update(detailsForm)
-      .eq('id', projectId);
-
-    if (error) {
-      showToast('Failed to save project details. Please try again.', 'error');
-    } else {
+    try {
+      await projectsApi.update(projectId, {
+        name: detailsForm.name,
+        description: detailsForm.description || null,
+        status: toProjectStatus(detailsForm.status),
+        brief: {
+          targetAudience: detailsForm.target_audience,
+          brandTone: detailsForm.brand_tone,
+          launchGoal: detailsForm.launch_date ? `Launch date: ${detailsForm.launch_date}` : undefined,
+        },
+      });
       showToast('Project details saved successfully!', 'success');
       setEditingDetails(false);
       loadProject();
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Failed to save project details. Please try again.', 'error');
     }
   };
 
@@ -261,9 +282,9 @@ export function ProjectDetail() {
                       onChange={(e) => setDetailsForm({ ...detailsForm, status: e.target.value })}
                       className="w-full px-4 py-3 rounded-xl bg-[var(--color-gray-dark)] border border-[var(--color-gray-medium)] text-white focus:outline-none focus:ring-2 focus:ring-[var(--color-ai-purple)]"
                     >
-                      <option value="draft">Draft</option>
-                      <option value="active">Active</option>
-                      <option value="completed">Completed</option>
+                      <option value="DRAFT">Draft</option>
+                      <option value="ACTIVE">Active</option>
+                      <option value="ARCHIVED">Archived</option>
                     </select>
                   </div>
                   <Button onClick={handleSaveDetails} className="w-full">

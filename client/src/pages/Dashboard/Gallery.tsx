@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Image as ImageIcon, FolderOpen, Download, Copy, Trash2, Edit2 } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { generatedVisualsApi, projectsApi, slugify } from '../../lib/api';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
@@ -60,17 +60,33 @@ export function Gallery() {
   const loadData = async () => {
     if (!projectId) return;
 
-    const [projectResult, productsResult, visualsResult] = await Promise.all([
-      supabase.from('projects').select('id, name').eq('id', projectId).maybeSingle(),
-      supabase.from('products').select('id, name, slug').eq('project_id', projectId),
-      supabase.from('visual_generations').select('*').eq('project_id', projectId).order('created_at', { ascending: false }),
-    ]);
+    try {
+      const { project } = await projectsApi.get(projectId);
+      setProject({ id: project.id, name: project.name });
+      setProducts(project.products.map((product) => ({ id: product.id, name: product.name, slug: slugify(product.name) })));
 
-    if (projectResult.data) setProject(projectResult.data);
-    if (productsResult.data) setProducts(productsResult.data);
-    if (visualsResult.data) setVisuals(visualsResult.data);
-
-    setLoading(false);
+      const loadedVisuals = (await Promise.all(
+        project.products.map(async (product) => {
+          const { generatedVisuals } = await generatedVisualsApi.list(product.id);
+          return generatedVisuals.map((visual) => ({
+            id: visual.id,
+            title: `${visual.style} visual`,
+            prompt: visual.promptUsed,
+            style: visual.style,
+            ratio: '',
+            image_url: visual.imageUrl,
+            product_id: visual.productId,
+            storage_path: `${slugify(project.name)}/Products/${slugify(product.name)}`,
+            created_at: visual.createdAt,
+          }));
+        }),
+      )).flat();
+      setVisuals(loadedVisuals.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
+    } catch {
+      showToast('Failed to load gallery. Please try again.', 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const organizeVisuals = (): FolderStructure => {
@@ -123,35 +139,16 @@ export function Gallery() {
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this visual?')) return;
 
-    const { error } = await supabase
-      .from('visual_generations')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      showToast('Failed to delete visual. Please try again.', 'error');
-    } else {
-      showToast('Visual deleted!', 'success');
-      loadData();
-    }
+    showToast('Deleting generated visuals is not available in the current backend MVP.', 'error');
   };
 
   const handleRename = async () => {
     if (!editingVisual || !newTitle.trim()) return;
 
-    const { error } = await supabase
-      .from('visual_generations')
-      .update({ title: newTitle.trim() })
-      .eq('id', editingVisual.id);
-
-    if (error) {
-      showToast('Failed to rename visual. Please try again.', 'error');
-    } else {
-      showToast('Visual renamed!', 'success');
-      setEditingVisual(null);
-      setNewTitle('');
-      loadData();
-    }
+    setVisuals((current) => current.map((visual) => visual.id === editingVisual.id ? { ...visual, title: newTitle.trim() } : visual));
+    showToast('Visual renamed locally. The backend MVP does not persist visual renames yet.', 'success');
+    setEditingVisual(null);
+    setNewTitle('');
   };
 
   const startRename = (visual: Visual) => {
